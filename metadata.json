@@ -1,0 +1,7 @@
+{
+  "name": "Budapest Checklist",
+  "description": "Aplicación móvil y web para registrar y marcar como visitados los lugares emblemáticos de Budapest con backend Node.js y MongoDB/Mongoose.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
