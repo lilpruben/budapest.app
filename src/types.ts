@@ -8,6 +8,8 @@ export type PlaceCategory =
 
 export type PlacePriority = 'imprescindible' | 'recomendado' | 'opcional';
 
+export type SortOption = 'recent' | 'alpha' | 'priority';
+
 export interface Place {
   _id: string;
   title: string;

@@ -3,18 +3,37 @@ import { Header } from './components/Header';
 import { StatsCard } from './components/StatsCard';
 import { FilterBar } from './components/FilterBar';
 import { PlaceItem } from './components/PlaceItem';
+import { PlaceCategoryGroup } from './components/PlaceCategoryGroup';
+import { MapView } from './components/MapView';
 import { AddPlaceModal } from './components/AddPlaceModal';
 import { ServerModal } from './components/ServerModal';
 import { EmptyState } from './components/EmptyState';
-import { Place, DbStatus, PlaceCategory, PlacePriority } from './types';
+import {
+  Place,
+  DbStatus,
+  PlaceCategory,
+  PlacePriority,
+  SortOption,
+} from './types';
 import {
   List,
   MapPin,
   Database,
   Plus,
   RefreshCw,
-  SlidersHorizontal,
+  ChevronsUpDown,
+  ChevronsDownUp,
+  FolderTree,
 } from 'lucide-react';
+
+const CATEGORY_SECTIONS: { id: PlaceCategory; label: string; icon: string }[] = [
+  { id: 'buda', label: 'Buda (Castillo & Colinas)', icon: '🏰' },
+  { id: 'pest', label: 'Pest (Centro & Danubio)', icon: '🏛️' },
+  { id: 'termas', label: 'Termas & Balnearios', icon: '♨️' },
+  { id: 'ruin-bars', label: 'Ruin Bars & Vida Nocturna', icon: '🍻' },
+  { id: 'cultura', label: 'Cultura & Monumentos', icon: '🎭' },
+  { id: 'miradores', label: 'Miradores Panorámicos', icon: '🌄' },
+];
 
 export default function App() {
   const [places, setPlaces] = useState<Place[]>([]);
@@ -23,10 +42,115 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
 
+  // Collapsible main sections state (persisted in localStorage)
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('budapest_header_collapsed') === 'true';
+  });
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('budapest_filters_collapsed') === 'true';
+  });
+  const [isStatsCollapsed, setIsStatsCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('budapest_stats_collapsed') === 'true';
+  });
+
+  // Group by category with collapsible sections in list view
+  const [groupByCategory, setGroupByCategory] = useState<boolean>(() => {
+    const stored = localStorage.getItem('budapest_group_by_category');
+    return stored !== null ? stored === 'true' : true;
+  });
+
+  // Collapsed state for individual category sections
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>(() => {
+    try {
+      const stored = localStorage.getItem('budapest_collapsed_categories');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleHeaderCollapse = () => {
+    setIsHeaderCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('budapest_header_collapsed', String(next));
+      return next;
+    });
+  };
+
+  const toggleFiltersCollapse = () => {
+    setIsFiltersCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('budapest_filters_collapsed', String(next));
+      return next;
+    });
+  };
+
+  const toggleStatsCollapse = () => {
+    setIsStatsCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('budapest_stats_collapsed', String(next));
+      return next;
+    });
+  };
+
+  const toggleGroupByCategory = () => {
+    setGroupByCategory((prev) => {
+      const next = !prev;
+      localStorage.setItem('budapest_group_by_category', String(next));
+      return next;
+    });
+  };
+
+  const toggleCategoryCollapse = (cat: PlaceCategory) => {
+    setCollapsedCategories((prev) => {
+      const next = { ...prev, [cat]: !prev[cat] };
+      localStorage.setItem('budapest_collapsed_categories', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const handleExpandAllCategories = () => {
+    setCollapsedCategories({});
+    localStorage.setItem('budapest_collapsed_categories', JSON.stringify({}));
+  };
+
+  const handleCollapseAllCategories = () => {
+    const allCollapsed: Record<string, boolean> = {};
+    CATEGORY_SECTIONS.forEach((c) => {
+      allCollapsed[c.id] = true;
+    });
+    setCollapsedCategories(allCollapsed);
+    localStorage.setItem('budapest_collapsed_categories', JSON.stringify(allCollapsed));
+  };
+
+  // Dark mode state with persistence
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('budapest_theme');
+      if (stored) return stored === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('budapest_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('budapest_theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleDark = () => setIsDark((prev) => !prev);
+
   // Filters state
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'visited'>('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState<'all' | PlacePriority>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('priority');
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -188,15 +312,37 @@ export default function App() {
     await fetchData();
   };
 
-  // Client-side filtering & search
+  // Reset all filters helper
+  const handleResetFilters = () => {
+    setSearch('');
+    setStatusFilter('all');
+    setSelectedCategory('all');
+    setPriorityFilter('all');
+  };
+
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of places) {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    }
+    return counts;
+  }, [places]);
+
+  // Client-side filtering, search & sorting
   const filteredPlaces = useMemo(() => {
-    return places.filter((place) => {
+    const list = places.filter((place) => {
       // Status filter
       if (statusFilter === 'pending' && place.visited) return false;
       if (statusFilter === 'visited' && !place.visited) return false;
 
       // Category filter
       if (selectedCategory !== 'all' && place.category !== selectedCategory) {
+        return false;
+      }
+
+      // Priority filter
+      if (priorityFilter !== 'all' && place.priority !== priorityFilter) {
         return false;
       }
 
@@ -214,32 +360,103 @@ export default function App() {
 
       return true;
     });
-  }, [places, statusFilter, selectedCategory, search]);
+
+    // Sorting criteria
+    return list.sort((a, b) => {
+      if (sortBy === 'recent') {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        if (timeB !== timeA) return timeB - timeA;
+        return b._id.localeCompare(a._id);
+      }
+
+      if (sortBy === 'alpha') {
+        return a.title.localeCompare(b.title, 'es', { sensitivity: 'base' });
+      }
+
+      if (sortBy === 'priority') {
+        const priorityOrder: Record<PlacePriority, number> = {
+          imprescindible: 1,
+          recomendado: 2,
+          opcional: 3,
+        };
+        const rankA = priorityOrder[a.priority] ?? 99;
+        const rankB = priorityOrder[b.priority] ?? 99;
+        if (rankA !== rankB) return rankA - rankB;
+        return a.title.localeCompare(b.title, 'es', { sensitivity: 'base' });
+      }
+
+      return 0;
+    });
+  }, [places, statusFilter, selectedCategory, priorityFilter, search, sortBy]);
+
+  // Group places by category for categorized collapsible sections
+  const groupedPlaces = useMemo(() => {
+    const groups: {
+      category: PlaceCategory;
+      label: string;
+      icon: string;
+      places: Place[];
+    }[] = [];
+
+    for (const cat of CATEGORY_SECTIONS) {
+      const matching = filteredPlaces.filter((p) => p.category === cat.id);
+      if (matching.length > 0) {
+        groups.push({
+          category: cat.id,
+          label: cat.label,
+          icon: cat.icon,
+          places: matching,
+        });
+      }
+    }
+
+    // Catch any remaining places
+    const knownCats = new Set(CATEGORY_SECTIONS.map((c) => c.id));
+    const others = filteredPlaces.filter((p) => !knownCats.has(p.category));
+    if (others.length > 0) {
+      groups.push({
+        category: 'cultura' as PlaceCategory,
+        label: 'Otros Lugares',
+        icon: '📍',
+        places: others,
+      });
+    }
+
+    return groups;
+  }, [filteredPlaces]);
 
   const totalCount = places.length;
   const visitedCount = places.filter((p) => p.visited).length;
   const isFiltered =
-    statusFilter !== 'all' || selectedCategory !== 'all' || Boolean(search.trim());
+    statusFilter !== 'all' ||
+    selectedCategory !== 'all' ||
+    priorityFilter !== 'all' ||
+    Boolean(search.trim());
 
   return (
-    <div className="bg-[#f3f4f6] w-full min-h-screen flex items-center justify-center font-sans overflow-x-hidden p-0 sm:p-4 sm:py-6">
+    <div className="bg-slate-100 dark:bg-slate-950 w-full min-h-[100dvh] flex items-center justify-center font-sans antialiased overflow-x-hidden p-0 sm:p-4 sm:py-6 transition-colors">
       {/* Phone Device Shell container matching High Density Theme */}
-      <div className="w-full max-w-[420px] min-h-screen sm:min-h-[740px] sm:max-h-[92vh] bg-white sm:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] sm:rounded-[40px] sm:border-[8px] sm:border-[#1e293b] flex flex-col relative overflow-hidden">
+      <div className="w-full max-w-[440px] h-[100dvh] sm:h-[840px] sm:max-h-[94vh] bg-white dark:bg-slate-900 sm:shadow-2xl sm:rounded-[38px] sm:border-[8px] sm:border-slate-800 dark:sm:border-slate-800 flex flex-col relative overflow-hidden transition-colors">
         {/* Top Speaker notch on desktop frame */}
-        <div className="hidden sm:flex h-5 w-1/3 bg-[#1e293b] absolute top-0 left-1/2 -translate-x-1/2 rounded-b-xl z-20 items-end justify-center pb-0.5">
+        <div className="hidden sm:flex h-5 w-1/3 bg-slate-800 absolute top-0 left-1/2 -translate-x-1/2 rounded-b-xl z-30 items-end justify-center pb-0.5">
           <div className="w-10 h-0.5 bg-slate-700 rounded-full" />
         </div>
 
-        {/* High Density Header */}
+        {/* High Density Header - Collapsible */}
         <Header
           dbStatus={dbStatus}
           totalCount={totalCount}
           visitedCount={visitedCount}
+          isDark={isDark}
+          onToggleDark={toggleDark}
           onOpenAddModal={() => setIsAddModalOpen(true)}
           onOpenServerModal={() => setIsServerModalOpen(true)}
+          isCollapsed={isHeaderCollapsed}
+          onToggleCollapse={toggleHeaderCollapse}
         />
 
-        {/* Filter Bar with category pills and search */}
+        {/* Filter Bar with category pills, search, priority and sorting - Collapsible */}
         <FilterBar
           search={search}
           onSearchChange={setSearch}
@@ -247,138 +464,196 @@ export default function App() {
           onStatusFilterChange={setStatusFilter}
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
+          priorityFilter={priorityFilter}
+          onPriorityFilterChange={setPriorityFilter}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          onResetFilters={handleResetFilters}
+          isFiltered={isFiltered}
+          filteredCount={filteredPlaces.length}
+          totalCount={totalCount}
+          categoryCounts={categoryCounts}
+          isCollapsed={isFiltersCollapsed}
+          onToggleCollapse={toggleFiltersCollapse}
         />
 
-        {/* Secondary quick summary badge */}
-        <StatsCard places={places} />
+        {/* Secondary quick summary badge - Collapsible */}
+        <StatsCard
+          places={places}
+          isCollapsed={isStatsCollapsed}
+          onToggleCollapse={toggleStatsCollapse}
+        />
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/50">
+        {/* Main Content Area: Scrollable view port */}
+        <main className="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-slate-900/60 pb-3 transition-colors">
           {/* Sticky Section Header */}
-          <div className="px-4 sm:px-6 py-2 bg-slate-100/90 backdrop-blur-xs border-y border-slate-200 sticky top-0 z-10 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-              Lugares ({filteredPlaces.length})
-            </span>
-            <button
-              type="button"
-              onClick={() => fetchData(true)}
-              disabled={isRefreshing}
-              className="text-[10px] font-mono font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
-              title="Refrescar datos"
-            >
-              <RefreshCw className={`w-2.5 h-2.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>SYNC</span>
-            </button>
+          <div className="px-4 sm:px-6 py-2 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs border-y border-slate-200 dark:border-slate-800 sticky top-0 z-10 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono">
+                {activeTab === 'map' ? 'Vista en Mapa' : 'Lugares'} ({filteredPlaces.length})
+              </span>
+              {activeTab === 'list' && filteredPlaces.length > 0 && (
+                <button
+                  id="toggle-group-mode-btn"
+                  type="button"
+                  onClick={toggleGroupByCategory}
+                  className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-1"
+                  title={groupByCategory ? 'Cambiar a lista continua' : 'Agrupar por categorías'}
+                >
+                  <FolderTree className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>{groupByCategory ? 'ZONAS' : 'LISTA'}</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {activeTab === 'list' && groupByCategory && filteredPlaces.length > 0 && (
+                <div className="flex items-center gap-1 text-[10px] font-mono">
+                  <button
+                    id="collapse-all-categories-btn"
+                    type="button"
+                    onClick={handleCollapseAllCategories}
+                    className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                    title="Colapsar todas las categorías"
+                  >
+                    Colapsar
+                  </button>
+                  <span className="text-slate-300 dark:text-slate-600">/</span>
+                  <button
+                    id="expand-all-categories-btn"
+                    type="button"
+                    onClick={handleExpandAllCategories}
+                    className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                    title="Expandir todas las categorías"
+                  >
+                    Expandir
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => fetchData(true)}
+                disabled={isRefreshing}
+                className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 transition-colors"
+                title="Refrescar datos"
+              >
+                <RefreshCw className={`w-2.5 h-2.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>SYNC</span>
+              </button>
+            </div>
           </div>
 
-          {/* Place Checklist rows */}
+          {/* Place Checklist rows or Interactive Map */}
           {isLoading ? (
             <div className="py-16 text-center space-y-2">
               <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs text-slate-400 font-mono">Cargando...</p>
+              <p className="text-xs text-slate-400 font-mono">Cargando puntos...</p>
             </div>
           ) : activeTab === 'map' ? (
-            /* Quick Budapest Map view with direct links */
-            <div className="p-4 space-y-3">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 text-xs leading-relaxed">
-                <strong className="block font-bold text-sm mb-1 text-emerald-950">
-                  Guía Geográfica de Budapest
-                </strong>
-                El río Danubio divide la capital en dos partes:
-                <ul className="list-disc list-inside mt-2 space-y-1 font-medium">
-                  <li><strong>Buda (Oeste):</strong> Colinas históricas, el Castillo, el Bastión y miradores panorámicos.</li>
-                  <li><strong>Pest (Este):</strong> La zona llana y vibrante con el Parlamento, Basílica, Gran Mercado y Ruin Pubs.</li>
-                </ul>
-              </div>
-
-              <div className="space-y-2">
-                {filteredPlaces.map((p) => (
-                  <a
-                    key={p._id}
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      p.googleMapsQuery || `${p.title} Budapest`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200 hover:border-slate-400 transition-colors"
-                  >
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900">{p.title}</h4>
-                      <p className="text-[10px] text-slate-500">{p.locationName || p.category.toUpperCase()}</p>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">
-                      Abrir Mapa
-                    </span>
-                  </a>
+            <MapView
+              places={filteredPlaces}
+              allPlaces={places}
+              onToggleVisited={handleToggleVisited}
+            />
+          ) : filteredPlaces.length > 0 ? (
+            groupByCategory ? (
+              <div className="flex flex-col">
+                {groupedPlaces.map((group) => (
+                  <PlaceCategoryGroup
+                    key={group.category}
+                    category={group.category}
+                    categoryLabel={group.label}
+                    categoryIcon={group.icon}
+                    places={group.places}
+                    isCollapsed={Boolean(collapsedCategories[group.category])}
+                    onToggleCollapse={toggleCategoryCollapse}
+                    onToggleVisited={handleToggleVisited}
+                    onDelete={handleDelete}
+                    onSaveNotes={handleSaveNotes}
+                  />
                 ))}
               </div>
-            </div>
-          ) : filteredPlaces.length > 0 ? (
-            <div className="flex flex-col">
-              {filteredPlaces.map((place) => (
-                <PlaceItem
-                  key={place._id}
-                  place={place}
-                  onToggleVisited={handleToggleVisited}
-                  onDelete={handleDelete}
-                  onSaveNotes={handleSaveNotes}
-                />
-              ))}
-            </div>
+            ) : (
+              <div className="flex flex-col">
+                {filteredPlaces.map((place) => (
+                  <PlaceItem
+                    key={place._id}
+                    place={place}
+                    onToggleVisited={handleToggleVisited}
+                    onDelete={handleDelete}
+                    onSaveNotes={handleSaveNotes}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <EmptyState
               isFiltered={isFiltered}
-              onClearFilters={() => {
-                setSearch('');
-                setStatusFilter('all');
-                setSelectedCategory('all');
-              }}
+              onClearFilters={handleResetFilters}
               onResetSeed={handleResetSeed}
               onOpenAddModal={() => setIsAddModalOpen(true)}
             />
           )}
         </main>
 
-        {/* High Density Footer Navigation */}
-        <footer className="h-16 bg-white border-t border-slate-100 px-6 flex items-center justify-between shrink-0 select-none">
+        {/* Fixed Mobile-Native Bottom Navigation Bar */}
+        <footer className="h-16 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-around select-none shadow-lg z-30 pb-[max(0.25rem,env(safe-area-inset-bottom))] transition-colors">
+          {/* LISTA Tab */}
           <button
+            id="nav-tab-list"
             type="button"
             onClick={() => setActiveTab('list')}
-            className={`flex flex-col items-center gap-0.5 transition-all ${
-              activeTab === 'list' ? 'opacity-100 scale-105' : 'opacity-40 hover:opacity-80'
+            className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-xl transition-all ${
+              activeTab === 'list'
+                ? 'bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-bold scale-105'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
-            <List className="w-5 h-5 text-slate-900" />
-            <span className="text-[10px] font-bold text-slate-900">LISTA</span>
+            <List className="w-5 h-5" />
+            <span className="text-[10px] font-mono font-bold mt-0.5">LISTA</span>
           </button>
 
+          {/* MAPA Tab with count pill */}
           <button
+            id="nav-tab-map"
             type="button"
             onClick={() => setActiveTab('map')}
-            className={`flex flex-col items-center gap-0.5 transition-all ${
-              activeTab === 'map' ? 'opacity-100 scale-105' : 'opacity-40 hover:opacity-80'
+            className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-xl transition-all relative ${
+              activeTab === 'map'
+                ? 'bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-bold scale-105'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
-            <MapPin className="w-5 h-5 text-slate-900" />
-            <span className="text-[10px] font-bold text-slate-900">MAPA</span>
+            <MapPin className="w-5 h-5" />
+            <span className="text-[10px] font-mono font-bold mt-0.5">MAPA</span>
+            {filteredPlaces.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] font-mono font-bold flex items-center justify-center shadow-xs">
+                {filteredPlaces.length}
+              </span>
+            )}
           </button>
 
+          {/* SEED/BD Config Tab */}
           <button
+            id="nav-tab-db"
             type="button"
             onClick={() => setIsServerModalOpen(true)}
-            className="flex flex-col items-center gap-0.5 opacity-40 hover:opacity-90 transition-all"
+            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all active:scale-95"
           >
-            <Database className="w-5 h-5 text-slate-900" />
-            <span className="text-[10px] font-bold text-slate-900">SEED/BD</span>
+            <Database className="w-5 h-5" />
+            <span className="text-[10px] font-mono font-bold mt-0.5">SERVER</span>
           </button>
 
+          {/* NUEVO Place Action */}
           <button
+            id="nav-tab-add"
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex flex-col items-center gap-0.5 opacity-40 hover:opacity-90 transition-all"
+            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all active:scale-95"
           >
-            <Plus className="w-5 h-5 text-slate-900 stroke-[2.5]" />
-            <span className="text-[10px] font-bold text-slate-900">NUEVO</span>
+            <Plus className="w-5 h-5 stroke-[2.5]" />
+            <span className="text-[10px] font-mono font-bold mt-0.5">NUEVO</span>
           </button>
         </footer>
       </div>

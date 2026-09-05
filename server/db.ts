@@ -38,13 +38,29 @@ function initMemoryStore() {
 }
 initMemoryStore();
 
-export async function connectDatabase(): Promise<void> {
-  const mongoUri = process.env.MONGODB_URI;
+function sanitizeMongoUri(rawUri: string): string {
+  let uri = rawUri.trim().replace(/^['"]|['"]$/g, '');
 
-  if (!mongoUri) {
+  // Auto-correct missing value for retryWrites (e.g. "?retryWrites" -> "?retryWrites=true")
+  uri = uri.replace(/([?&])retryWrites(?!=)/g, '$1retryWrites=true');
+  // Auto-correct missing value for w (e.g. "&w" -> "&w=majority")
+  uri = uri.replace(/([?&])w(?!=)/g, '$1w=majority');
+
+  // Strip dangling '?' or '&' at the end of the URI
+  uri = uri.replace(/[?&]$/, '');
+
+  return uri;
+}
+
+export async function connectDatabase(): Promise<void> {
+  const rawMongoUri = process.env.MONGODB_URI;
+
+  if (!rawMongoUri) {
     console.log('[DB] No MONGODB_URI provided. Running in high-performance memory fallback mode with Budapest seed data.');
     return;
   }
+
+  const mongoUri = sanitizeMongoUri(rawMongoUri);
 
   try {
     console.log(`[DB] Attempting connection to MongoDB at: ${mongoUri.replace(/:[^:@]+@/, ':****@')}`);
@@ -57,14 +73,31 @@ export async function connectDatabase(): Promise<void> {
     isMongoActive = true;
     console.log('[DB] Successfully connected to MongoDB via Mongoose!');
 
-    // Check if collection is empty, and auto-seed if needed
+    // Check if collection is empty or has old demo seed, and sync with the 40 real places
     const count = await PlaceModel.countDocuments();
-    if (count === 0) {
-      console.log(`[DB] MongoDB collection 'places' is empty. Auto-seeding ${BUDAPEST_SEED_PLACES.length} iconic Budapest places...`);
+    if (count === 0 || process.env.RESET_SEED === 'true') {
+      if (process.env.RESET_SEED === 'true') {
+        await PlaceModel.deleteMany({});
+      }
+      console.log(`[DB] Seeding ${BUDAPEST_SEED_PLACES.length} places from shared Budapest list...`);
       await PlaceModel.insertMany(BUDAPEST_SEED_PLACES as any);
       console.log('[DB] Seeding completed successfully.');
     } else {
-      console.log(`[DB] Found ${count} existing Budapest places in MongoDB.`);
+      console.log(`[DB] Found ${count} existing Budapest places in MongoDB. Verifying complete list of 40 sites...`);
+      // Ensure all 40 sites from the shared list exist without overwriting existing visited state
+      let added = 0;
+      for (const place of BUDAPEST_SEED_PLACES) {
+        const exists = await PlaceModel.findOne({
+          $or: [{ title: place.title }, { originalName: place.originalName }],
+        });
+        if (!exists) {
+          await PlaceModel.create(place);
+          added++;
+        }
+      }
+      if (added > 0) {
+        console.log(`[DB] Added ${added} missing places from the shared list to MongoDB.`);
+      }
     }
   } catch (err: any) {
     isMongoActive = false;
