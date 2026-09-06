@@ -27,6 +27,7 @@ interface PlaceItemProps {
   onUploadPhotos?: (id: string, photos: string[]) => Promise<void>;
   onDeletePhoto?: (id: string, photoIndex: number) => Promise<void>;
   isAdmin?: boolean;
+  onOpenCheckpointModal?: (place: Place, isExchanging: boolean) => void;
 }
 
 export const PlaceItem: React.FC<PlaceItemProps> = ({
@@ -37,6 +38,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
   onUploadPhotos,
   onDeletePhoto,
   isAdmin = false,
+  onOpenCheckpointModal,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [notes, setNotes] = useState(place.notes || '');
@@ -99,18 +101,30 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
 
   const photoCount = Array.isArray(place.photos) ? place.photos.length : 0;
 
+  const handleToggleClick = () => {
+    if (!place.visited) {
+      // If not visited yet, check if there's a photo. If no photo, automatically open checkpoint photo modal
+      const hasPhoto = Array.isArray(place.photos) && place.photos.length > 0;
+      if (!hasPhoto && onOpenCheckpointModal) {
+        onOpenCheckpointModal(place, false);
+        return;
+      }
+    }
+    onToggleVisited(place._id, place.visited);
+  };
+
   return (
     <article
       id={`place-card-${place._id}`}
       className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 group hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
     >
       {/* High Density Row */}
-      <div className="flex items-center gap-3.5 px-4 sm:px-6 py-3.5">
+      <div className="flex items-center gap-3 px-4 sm:px-6 py-3.5">
         {/* Toggle Checkbox matching High Density Theme */}
         <button
           id={`toggle-place-${place._id}`}
           type="button"
-          onClick={() => onToggleVisited(place._id, place.visited)}
+          onClick={handleToggleClick}
           aria-label={`Marcar ${place.title} como ${place.visited ? 'no visitado' : 'visitado'}`}
           className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all active:scale-95 ${
             place.visited
@@ -126,6 +140,28 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
             <div className="w-5 h-5 rounded-md border-2 border-slate-300 dark:border-slate-600 group-hover:border-slate-400 dark:group-hover:border-slate-500" />
           )}
         </button>
+
+        {/* Thumbnail preview if has photo */}
+        {photoCount > 0 && place.photos?.[0] && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setPreviewPhoto(place.photos![0]);
+            }}
+            className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs group/thumb hover:scale-105 transition-transform"
+            title="Ver foto del recuerdo a pantalla completa"
+          >
+            <img
+              src={place.photos[0]}
+              alt={place.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white transition-opacity">
+              <Maximize2 className="w-3.5 h-3.5" />
+            </div>
+          </button>
+        )}
 
         {/* Title, Subtitle, and District */}
         <div
@@ -145,15 +181,6 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
                 ({place.originalName})
               </span>
             )}
-            {photoCount > 0 && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                title={`${photoCount} foto(s) guardadas`}
-              >
-                <Camera className="w-3 h-3" />
-                <span>{photoCount}</span>
-              </span>
-            )}
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
             {place.locationName || `${place.category.toUpperCase()} • Budapest`}
@@ -161,7 +188,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
         </div>
 
         {/* Right Status Pill & Expand Trigger */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span
             className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
               place.visited
@@ -235,89 +262,123 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
             </span>
           </div>
 
-          {/* Photo Gallery & Upload Section */}
-          <div className="p-3 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-2.5">
+          {/* Photo Gallery & Checkpoint Memory Section */}
+          <div className="p-3.5 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                 <Camera className="w-3.5 h-3.5 text-amber-500" />
-                <span>Fotos del monumento ({photoCount})</span>
+                <span>Foto del Checkpoint</span>
               </div>
 
-              {/* Upload trigger button */}
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id={`upload-input-${place._id}`}
-                />
-                <label
-                  htmlFor={`upload-input-${place._id}`}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                    isUploadingPhoto
-                      ? 'bg-slate-200 text-slate-400 pointer-events-none'
-                      : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-300/50 dark:border-amber-700/50'
-                  }`}
+              {/* Action trigger */}
+              {photoCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenCheckpointModal?.(place, true)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60 transition-all shadow-2xs"
+                  title="Cambiar la foto actual por otra nueva"
                 >
-                  {isUploadingPhoto ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Subiendo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <ImagePlus className="w-3.5 h-3.5" />
-                      <span>Subir fotos</span>
-                    </>
-                  )}
-                </label>
-              </div>
+                  <Camera className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                  <span>Cambiar foto</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenCheckpointModal?.(place, false)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-2xs"
+                  title="Hacer foto y marcar este lugar"
+                >
+                  <Camera className="w-3 h-3" />
+                  <span>Hacer foto</span>
+                </button>
+              )}
             </div>
 
-            {/* Photos Grid */}
-            {photoCount > 0 ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 pt-1">
-                {place.photos!.map((photoUrl, idx) => (
-                  <div
-                    key={`${place._id}-photo-${idx}`}
-                    className="relative group/photo aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-2xs"
-                  >
-                    <img
-                      src={photoUrl}
-                      alt={`${place.title} foto ${idx + 1}`}
-                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
-                      onClick={() => setPreviewPhoto(photoUrl)}
-                    />
-
-                    {/* Hover actions */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewPhoto(photoUrl)}
-                        className="p-1 rounded-md bg-black/60 text-white hover:bg-black/80 transition-colors"
-                        title="Ver en grande"
-                      >
-                        <Maximize2 className="w-3 h-3" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePhoto(idx)}
-                        className="p-1 rounded-md bg-rose-600/80 text-white hover:bg-rose-700 transition-colors"
-                        title="Eliminar foto"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
+            {/* Official Photo Card */}
+            {photoCount > 0 && place.photos?.[0] ? (
+              <div className="flex flex-col sm:flex-row items-center gap-3 p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                {/* Photo frame with zoom */}
+                <div
+                  className="relative group/photo w-full sm:w-36 h-28 sm:h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 shrink-0 cursor-pointer"
+                  onClick={() => setPreviewPhoto(place.photos![0])}
+                  title="Haz clic para ver la foto en grande"
+                >
+                  <img
+                    src={place.photos[0]}
+                    alt={`Recuerdo de ${place.title}`}
+                    className="w-full h-full object-cover group-hover/photo:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center text-white gap-2">
+                    <Maximize2 className="w-4 h-4" />
+                    <span className="text-[10px] font-bold">Ver</span>
                   </div>
-                ))}
+                </div>
+
+                {/* Photo info & exchange quick button */}
+                <div className="flex-1 min-w-0 text-left w-full">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                      FOTO GUARDADA
+                    </span>
+                    {place.visitedAt && (
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                        {new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(new Date(place.visitedAt))}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                    Esta es tu foto del recuerdo para este monumento. Si no te convence o tomaste una mejor, puedes cambiarla en cualquier momento.
+                  </p>
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenCheckpointModal?.(place, true)}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:underline"
+                    >
+                      <Camera className="w-3 h-3" />
+                      <span>Cambiar por otra foto</span>
+                    </button>
+                    <span className="text-slate-300 dark:text-slate-700">•</span>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewPhoto(place.photos![0])}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    >
+                      <Maximize2 className="w-3 h-3" />
+                      <span>Ver pantalla completa</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 italic">
-                Aún no has subido fotos de este lugar. ¡Sube una o varias desde tu cámara o galería!
-              </p>
+              /* No photo state */
+              <div className="p-3 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/40 rounded-xl flex items-center justify-between gap-3">
+                <div className="text-xs text-amber-900 dark:text-amber-300 flex items-start gap-2">
+                  <Camera className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block">
+                      {place.visited
+                        ? '¡Falta la foto obligatoria de este lugar!'
+                        : 'Lugar pendiente de visita'}
+                    </span>
+                    <span className="text-[11px] text-amber-800/80 dark:text-amber-400">
+                      {place.visited
+                        ? 'Al estar visitado debe tener su foto de recuerdo. Hazte una foto ahora.'
+                        : 'Al marcar este checkpoint se abrirá la cámara para que te hagas tu foto aquí.'}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => onOpenCheckpointModal?.(place, false)}
+                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-2xs transition-all"
+                >
+                  Hacer Foto
+                </button>
+              </div>
             )}
           </div>
 

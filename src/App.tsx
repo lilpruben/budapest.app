@@ -9,6 +9,7 @@ import { AddPlaceModal } from './components/AddPlaceModal';
 import { ServerModal } from './components/ServerModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { TripRecapModal } from './components/TripRecapModal';
+import { CheckpointModal } from './components/CheckpointModal';
 import { EmptyState } from './components/EmptyState';
 import {
   Place,
@@ -27,6 +28,7 @@ import {
   ChevronsDownUp,
   FolderTree,
   Camera,
+  Lock,
 } from 'lucide-react';
 
 const CATEGORY_SECTIONS: { id: PlaceCategory; label: string; icon: string }[] = [
@@ -164,6 +166,37 @@ export default function App() {
     return localStorage.getItem('budapest_is_admin') === 'true';
   });
 
+  // Checkpoint & Photo exchange state
+  const [checkpointPlace, setCheckpointPlace] = useState<Place | null>(null);
+  const [isCheckpointModalOpen, setIsCheckpointModalOpen] = useState(false);
+  const [isExchangingPhoto, setIsExchangingPhoto] = useState(false);
+
+  const handleOpenCheckpointModal = (place: Place, isExchanging: boolean) => {
+    setCheckpointPlace(place);
+    setIsExchangingPhoto(isExchanging);
+    setIsCheckpointModalOpen(true);
+  };
+
+  const handleConfirmCheckpointPhoto = async (placeId: string, photoDataUrl: string) => {
+    const res = await fetch(`/api/places/${placeId}/photo`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photo: photoDataUrl }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Error al guardar la foto');
+    }
+
+    const resData = await res.json();
+    if (resData.ok && resData.data) {
+      setPlaces((prev) =>
+        prev.map((p) => (p._id === placeId ? { ...p, ...resData.data } : p))
+      );
+    }
+  };
+
   // Load places and DB status
   const fetchData = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) setIsRefreshing(true);
@@ -205,8 +238,21 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
-  // Toggle visited flag with optimistic UI update
+  // Toggle visited flag with optimistic UI update and mandatory photo check
   const handleToggleVisited = async (id: string, current: boolean) => {
+    const targetPlace = places.find((p) => p._id === id);
+    if (!targetPlace) return;
+
+    if (!current) {
+      // User is attempting to mark as visited: check if it already has a photo
+      const hasPhoto = Array.isArray(targetPlace.photos) && targetPlace.photos.length > 0;
+      if (!hasPhoto) {
+        // Automatically open the camera / photo modal!
+        handleOpenCheckpointModal(targetPlace, false);
+        return;
+      }
+    }
+
     const nextVisited = !current;
 
     // Optimistic state update
@@ -652,6 +698,7 @@ export default function App() {
                     onUploadPhotos={handleUploadPhotos}
                     onDeletePhoto={handleDeletePhoto}
                     isAdmin={isAdmin}
+                    onOpenCheckpointModal={handleOpenCheckpointModal}
                   />
                 ))}
               </div>
@@ -667,6 +714,7 @@ export default function App() {
                     onUploadPhotos={handleUploadPhotos}
                     onDeletePhoto={handleDeletePhoto}
                     isAdmin={isAdmin}
+                    onOpenCheckpointModal={handleOpenCheckpointModal}
                   />
                 ))}
               </div>
@@ -679,6 +727,27 @@ export default function App() {
               onOpenAddModal={() => setIsAddModalOpen(true)}
             />
           )}
+
+          {/* Discreet footer for regular visitors with subtle admin access */}
+          <div className="mt-8 py-6 border-t border-slate-100 dark:border-slate-800/80 text-center text-xs text-slate-400 dark:text-slate-500 flex flex-col items-center justify-center gap-1.5 pb-20">
+            <p className="font-semibold text-slate-600 dark:text-slate-400">
+              Budapest Travel Checklist • 2026
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-600">
+              <span>Guía para explorar Buda y Pest</span>
+              {!isAdmin && (
+                <button
+                  id="discreet-admin-login-btn"
+                  type="button"
+                  onClick={() => setIsAdminLoginModalOpen(true)}
+                  className="text-slate-300 dark:text-slate-700 hover:text-slate-500 dark:hover:text-slate-400 transition-colors p-1"
+                  title="Acceso restringido"
+                >
+                  <Lock className="w-2.5 h-2.5 opacity-50 hover:opacity-100" />
+                </button>
+              )}
+            </div>
+          </div>
         </main>
 
         {/* Fixed Mobile-Native Bottom Navigation Bar */}
@@ -789,6 +858,16 @@ export default function App() {
         onClose={() => setIsTripRecapModalOpen(false)}
         places={places}
         isAdmin={isAdmin}
+        onOpenCheckpointModal={handleOpenCheckpointModal}
+      />
+
+      {/* Checkpoint Mandatory Photo & Exchange Modal */}
+      <CheckpointModal
+        isOpen={isCheckpointModalOpen}
+        place={checkpointPlace}
+        isExchanging={isExchangingPhoto}
+        onClose={() => setIsCheckpointModalOpen(false)}
+        onConfirmPhoto={handleConfirmCheckpointPhoto}
       />
     </div>
   );

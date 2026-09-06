@@ -167,6 +167,35 @@ async function startServer() {
     }
   });
 
+  // Set / exchange the primary checkpoint photo of a place
+  app.put('/api/places/:id/photo', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { photo } = req.body;
+
+      if (!photo || typeof photo !== 'string' || !photo.trim()) {
+        res.status(400).json({ ok: false, error: 'Foto no válida' });
+        return;
+      }
+
+      const updated = await dbService.updatePlace(id, {
+        photos: [photo.trim()],
+        visited: true,
+        visitedAt: new Date(),
+      });
+
+      if (!updated) {
+        res.status(404).json({ ok: false, error: 'Lugar no encontrado' });
+        return;
+      }
+
+      res.json({ ok: true, data: updated });
+    } catch (err: any) {
+      console.error('[API] Error replacing photo:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
   // Admin login check endpoint
   app.post('/api/admin/login', (req: Request, res: Response) => {
     try {

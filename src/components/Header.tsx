@@ -81,32 +81,29 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden xs:inline">Álbum</span>
           </button>
 
-          {/* Admin Indicator / Login */}
-          <button
-            id="admin-compact-btn"
-            type="button"
-            onClick={onOpenAdminModal}
-            title={isAdmin ? 'Panel de Administrador' : 'Iniciar Sesión Admin'}
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-              isAdmin
-                ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            {isAdmin ? <ShieldCheck className="w-3.5 h-3.5" /> : <Lock className="w-3 h-3" />}
-          </button>
-
-          {/* Server Button (ONLY IF ADMIN) */}
+          {/* Admin Indicator / Controls (ONLY IF ADMIN) */}
           {isAdmin && (
-            <button
-              id="server-compact-btn"
-              type="button"
-              onClick={onOpenServerModal}
-              title="Ajustes de Servidor & Base de datos"
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-900 text-emerald-400 border border-slate-700 hover:bg-slate-800 transition-all"
-            >
-              <Database className="w-3 h-3" />
-            </button>
+            <>
+              <button
+                id="admin-compact-btn"
+                type="button"
+                onClick={onOpenAdminModal}
+                title="Panel de Administrador"
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                id="server-compact-btn"
+                type="button"
+                onClick={onOpenServerModal}
+                title="Ajustes de Servidor & Base de datos"
+                className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-900 text-emerald-400 border border-slate-700 hover:bg-slate-800 transition-all"
+              >
+                <Database className="w-3 h-3" />
+              </button>
+            </>
           )}
 
           {/* Dark Mode */}
@@ -140,9 +137,9 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="pt-3 sm:pt-4 px-4 sm:px-6 pb-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0 transition-colors">
       {/* Top action row */}
       <div className="flex justify-between items-center mb-2.5">
-        {/* Left Side: Admin Badge or Admin Login */}
+        {/* Left Side: Admin Badge (ONLY IF ADMIN) */}
         <div className="flex items-center gap-2">
-          {isAdmin ? (
+          {isAdmin && (
             /* Admin is logged in: show Admin Badge and Server tools */
             <div className="flex items-center gap-2">
               <button
@@ -179,18 +176,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <Database className="w-3 h-3 opacity-80" />
               </button>
             </div>
-          ) : (
-            /* Normal User: Keep clean, no server details, subtle Admin button */
-            <button
-              id="open-admin-login-btn"
-              type="button"
-              onClick={onOpenAdminModal}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-              title="Acceso para Administrador / Desarrollador"
-            >
-              <Lock className="w-3 h-3 opacity-70" />
-              <span className="text-[10px] font-bold tracking-wide">ADMIN</span>
-            </button>
           )}
 
           {/* Trip Recap / Album trigger */}

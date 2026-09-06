@@ -22,6 +22,7 @@ interface TripRecapModalProps {
   onClose: () => void;
   places: Place[];
   isAdmin: boolean;
+  onOpenCheckpointModal?: (place: Place, isExchanging: boolean) => void;
 }
 
 export const TripRecapModal: React.FC<TripRecapModalProps> = ({
@@ -29,9 +30,11 @@ export const TripRecapModal: React.FC<TripRecapModalProps> = ({
   onClose,
   places,
   isAdmin,
+  onOpenCheckpointModal,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [fullscreenPhoto, setFullscreenPhoto] = useState<{
+    placeId: string;
     placeTitle: string;
     photoUrl: string;
     date?: string | null;
@@ -358,6 +361,7 @@ export const TripRecapModal: React.FC<TripRecapModalProps> = ({
                     key={`${item.placeId}-${item.photoIndex}-${index}`}
                     onClick={() =>
                       setFullscreenPhoto({
+                        placeId: item.placeId,
                         placeTitle: item.placeTitle,
                         photoUrl: item.photoUrl,
                         date: item.visitedAt,
@@ -469,9 +473,34 @@ export const TripRecapModal: React.FC<TripRecapModalProps> = ({
             />
           </div>
 
-          {/* Bottom info */}
-          <div className="text-center text-slate-400 text-xs pt-3">
-            Pulsa en la X o fuera para cerrar el visor
+          {/* Bottom info & actions */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-3 border-t border-white/10">
+            <span className="text-slate-400 text-xs">
+              {fullscreenPhoto.date
+                ? `Visitado el ${new Date(fullscreenPhoto.date).toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}`
+                : 'Recuerdo del viaje'}
+            </span>
+
+            {onOpenCheckpointModal && (
+              <button
+                type="button"
+                onClick={() => {
+                  const p = places.find((pl) => pl._id === fullscreenPhoto.placeId);
+                  if (p) {
+                    setFullscreenPhoto(null);
+                    onOpenCheckpointModal(p, true);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-semibold transition-all"
+              >
+                <Camera className="w-3.5 h-3.5 text-amber-300" />
+                <span>Intercambiar foto de este sitio</span>
+              </button>
+            )}
           </div>
         </div>
       )}
