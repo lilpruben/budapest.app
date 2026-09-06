@@ -24,6 +24,7 @@ export interface Place {
   tip?: string;
   visitedAt?: string | null;
   notes?: string;
+  photos?: string[];
   createdAt?: string;
   updatedAt?: string;
 }

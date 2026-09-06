@@ -7,6 +7,8 @@ import { PlaceCategoryGroup } from './components/PlaceCategoryGroup';
 import { MapView } from './components/MapView';
 import { AddPlaceModal } from './components/AddPlaceModal';
 import { ServerModal } from './components/ServerModal';
+import { AdminLoginModal } from './components/AdminLoginModal';
+import { TripRecapModal } from './components/TripRecapModal';
 import { EmptyState } from './components/EmptyState';
 import {
   Place,
@@ -24,6 +26,7 @@ import {
   ChevronsUpDown,
   ChevronsDownUp,
   FolderTree,
+  Camera,
 } from 'lucide-react';
 
 const CATEGORY_SECTIONS: { id: PlaceCategory; label: string; icon: string }[] = [
@@ -152,9 +155,14 @@ export default function App() {
   const [priorityFilter, setPriorityFilter] = useState<'all' | PlacePriority>('all');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
 
-  // Modals state
+  // Modals & Admin state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
+  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false);
+  const [isTripRecapModalOpen, setIsTripRecapModalOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    return localStorage.getItem('budapest_is_admin') === 'true';
+  });
 
   // Load places and DB status
   const fetchData = useCallback(async (showRefreshing = false) => {
@@ -274,6 +282,73 @@ export default function App() {
     } catch (err) {
       console.error('Failed to save notes:', err);
     }
+  };
+
+  // Upload photos to a place
+  const handleUploadPhotos = async (id: string, photos: string[]) => {
+    try {
+      const res = await fetch(`/api/places/${id}/photos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photos }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.data) {
+          setPlaces((prev) =>
+            prev.map((p) => (p._id === id ? { ...p, photos: data.data.photos } : p))
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Failed to upload photos:', err);
+    }
+  };
+
+  // Delete a photo from a place
+  const handleDeletePhoto = async (id: string, photoIndex: number) => {
+    try {
+      const res = await fetch(`/api/places/${id}/photos/${photoIndex}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.data) {
+          setPlaces((prev) =>
+            prev.map((p) => (p._id === id ? { ...p, photos: data.data.photos } : p))
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Failed to delete photo:', err);
+    }
+  };
+
+  // Admin login handler
+  const handleAdminLogin = async (password: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setIsAdmin(true);
+        localStorage.setItem('budapest_is_admin', 'true');
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error during admin login:', err);
+      return false;
+    }
+  };
+
+  // Admin logout handler
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem('budapest_is_admin');
   };
 
   // Add new place
@@ -454,6 +529,9 @@ export default function App() {
           onOpenServerModal={() => setIsServerModalOpen(true)}
           isCollapsed={isHeaderCollapsed}
           onToggleCollapse={toggleHeaderCollapse}
+          isAdmin={isAdmin}
+          onOpenAdminModal={() => setIsAdminLoginModalOpen(true)}
+          onOpenTripRecap={() => setIsTripRecapModalOpen(true)}
         />
 
         {/* Filter Bar with category pills, search, priority and sorting - Collapsible */}
@@ -571,6 +649,9 @@ export default function App() {
                     onToggleVisited={handleToggleVisited}
                     onDelete={handleDelete}
                     onSaveNotes={handleSaveNotes}
+                    onUploadPhotos={handleUploadPhotos}
+                    onDeletePhoto={handleDeletePhoto}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </div>
@@ -583,6 +664,9 @@ export default function App() {
                     onToggleVisited={handleToggleVisited}
                     onDelete={handleDelete}
                     onSaveNotes={handleSaveNotes}
+                    onUploadPhotos={handleUploadPhotos}
+                    onDeletePhoto={handleDeletePhoto}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </div>
@@ -634,16 +718,31 @@ export default function App() {
             )}
           </button>
 
-          {/* SEED/BD Config Tab */}
+          {/* ÁLBUM / RECAP Tab */}
           <button
-            id="nav-tab-db"
+            id="nav-tab-recap"
             type="button"
-            onClick={() => setIsServerModalOpen(true)}
-            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all active:scale-95"
+            onClick={() => setIsTripRecapModalOpen(true)}
+            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-all active:scale-95"
+            title="Ver Álbum de Fotos & Recap del Viaje"
           >
-            <Database className="w-5 h-5" />
-            <span className="text-[10px] font-mono font-bold mt-0.5">SERVER</span>
+            <Camera className="w-5 h-5" />
+            <span className="text-[10px] font-mono font-bold mt-0.5">ÁLBUM</span>
           </button>
+
+          {/* SEED/BD Config Tab - ONLY FOR ADMIN (hidden from normal users) */}
+          {isAdmin && (
+            <button
+              id="nav-tab-db"
+              type="button"
+              onClick={() => setIsServerModalOpen(true)}
+              className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-all active:scale-95"
+              title="Ajustes de Servidor & Base de datos (Solo Desarrollador)"
+            >
+              <Database className="w-5 h-5" />
+              <span className="text-[10px] font-mono font-bold mt-0.5">SERVER</span>
+            </button>
+          )}
 
           {/* NUEVO Place Action */}
           <button
@@ -670,6 +769,26 @@ export default function App() {
         onClose={() => setIsServerModalOpen(false)}
         dbStatus={dbStatus}
         onResetSeed={handleResetSeed}
+      />
+
+      {/* Admin Login & Developer Actions Modal */}
+      <AdminLoginModal
+        isOpen={isAdminLoginModalOpen}
+        isAdmin={isAdmin}
+        dbStatus={dbStatus}
+        onClose={() => setIsAdminLoginModalOpen(false)}
+        onLogin={handleAdminLogin}
+        onLogout={handleAdminLogout}
+        onOpenServerModal={() => setIsServerModalOpen(true)}
+        onOpenTripRecap={() => setIsTripRecapModalOpen(true)}
+      />
+
+      {/* Trip Memories Album & Final Recap Modal */}
+      <TripRecapModal
+        isOpen={isTripRecapModalOpen}
+        onClose={() => setIsTripRecapModalOpen(false)}
+        places={places}
+        isAdmin={isAdmin}
       />
     </div>
   );

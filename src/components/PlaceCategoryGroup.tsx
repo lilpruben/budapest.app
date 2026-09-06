@@ -13,6 +13,9 @@ interface PlaceCategoryGroupProps {
   onToggleVisited: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
   onSaveNotes: (id: string, notes: string) => Promise<void>;
+  onUploadPhotos?: (id: string, photos: string[]) => Promise<void>;
+  onDeletePhoto?: (id: string, photoIndex: number) => Promise<void>;
+  isAdmin?: boolean;
 }
 
 export const PlaceCategoryGroup: React.FC<PlaceCategoryGroupProps> = ({
@@ -25,6 +28,9 @@ export const PlaceCategoryGroup: React.FC<PlaceCategoryGroupProps> = ({
   onToggleVisited,
   onDelete,
   onSaveNotes,
+  onUploadPhotos,
+  onDeletePhoto,
+  isAdmin = false,
 }) => {
   if (places.length === 0) return null;
 
@@ -95,6 +101,9 @@ export const PlaceCategoryGroup: React.FC<PlaceCategoryGroupProps> = ({
               onToggleVisited={onToggleVisited}
               onDelete={onDelete}
               onSaveNotes={onSaveNotes}
+              onUploadPhotos={onUploadPhotos}
+              onDeletePhoto={onDeletePhoto}
+              isAdmin={isAdmin}
             />
           ))}
         </div>

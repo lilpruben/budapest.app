@@ -13,6 +13,7 @@ export interface IPlace {
   tip?: string;
   visitedAt?: Date | null;
   notes?: string;
+  photos?: string[];
 }
 
 const PlaceSchema = new Schema<IPlace>(
@@ -73,6 +74,10 @@ const PlaceSchema = new Schema<IPlace>(
     notes: {
       type: String,
       default: '',
+    },
+    photos: {
+      type: [String],
+      default: [],
     },
   },
   {

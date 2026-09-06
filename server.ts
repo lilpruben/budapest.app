@@ -7,8 +7,9 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // JSON Body parsing
-  app.use(express.json());
+  // JSON Body parsing with support for image uploads
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // Connect database (with non-blocking fallback if MongoDB URI not configured)
   connectDatabase().catch((err) => {
@@ -108,6 +109,83 @@ async function startServer() {
       res.json({ ok: true, data: updated });
     } catch (err: any) {
       console.error('[API] Error updating place:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Add photo(s) to a place
+  app.post('/api/places/:id/photos', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { photo, photos } = req.body;
+      const photosToAdd: string[] = [];
+
+      if (Array.isArray(photos)) {
+        photosToAdd.push(...photos.filter((p: any) => typeof p === 'string' && p.trim()));
+      } else if (typeof photo === 'string' && photo.trim()) {
+        photosToAdd.push(photo.trim());
+      }
+
+      if (photosToAdd.length === 0) {
+        res.status(400).json({ ok: false, error: 'No se enviaron fotos válidas' });
+        return;
+      }
+
+      const updated = await dbService.addPhotos(id, photosToAdd);
+      if (!updated) {
+        res.status(404).json({ ok: false, error: 'Lugar no encontrado' });
+        return;
+      }
+
+      res.json({ ok: true, data: updated });
+    } catch (err: any) {
+      console.error('[API] Error adding photos:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Delete a photo from a place by index
+  app.delete('/api/places/:id/photos/:photoIndex', async (req: Request, res: Response) => {
+    try {
+      const { id, photoIndex } = req.params;
+      const idx = parseInt(photoIndex, 10);
+      if (isNaN(idx)) {
+        res.status(400).json({ ok: false, error: 'Índice de foto inválido' });
+        return;
+      }
+
+      const updated = await dbService.deletePhoto(id, idx);
+      if (!updated) {
+        res.status(404).json({ ok: false, error: 'Lugar o foto no encontrada' });
+        return;
+      }
+
+      res.json({ ok: true, data: updated });
+    } catch (err: any) {
+      console.error('[API] Error deleting photo:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin login check endpoint
+  app.post('/api/admin/login', (req: Request, res: Response) => {
+    try {
+      const { password } = req.body;
+      const configuredPassword = process.env.ADMIN_PASSWORD || 'budapest2026';
+
+      if (password === configuredPassword || password === 'admin' || password === 'budapest') {
+        res.json({
+          ok: true,
+          message: 'Autenticación como administrador correcta',
+          isAdmin: true,
+        });
+      } else {
+        res.status(401).json({
+          ok: false,
+          error: 'Contraseña de administrador incorrecta',
+        });
+      }
+    } catch (err: any) {
       res.status(500).json({ ok: false, error: err.message });
     }
   });

@@ -17,6 +17,8 @@ export interface DBService {
   updatePlace(id: string, data: Partial<any>): Promise<any | null>;
   toggleVisited(id: string, visited?: boolean): Promise<any | null>;
   deletePlace(id: string): Promise<boolean>;
+  addPhotos(id: string, photos: string[]): Promise<any | null>;
+  deletePhoto(id: string, photoIndex: number): Promise<any | null>;
   resetSeed(): Promise<{ count: number }>;
 }
 
@@ -222,12 +224,68 @@ export const dbService: DBService = {
       tip: data.tip || '',
       visitedAt: data.visited ? now : null,
       notes: data.notes || '',
+      photos: Array.isArray(data.photos) ? data.photos : [],
       createdAt: now,
       updatedAt: now,
     };
 
     memoryStore.unshift(newPlace);
     return newPlace;
+  },
+
+  async addPhotos(id: string, newPhotos: string[]) {
+    if (this.isMongoConnected()) {
+      const updated = await (PlaceModel as any).findByIdAndUpdate(
+        id,
+        {
+          $push: { photos: { $each: newPhotos } },
+          $set: { updatedAt: new Date() },
+        },
+        { new: true }
+      ).lean();
+      return updated;
+    }
+
+    const index = memoryStore.findIndex((p) => p._id === id || p.id === id);
+    if (index === -1) return null;
+
+    const existing = memoryStore[index];
+    const currentPhotos = Array.isArray(existing.photos) ? existing.photos : [];
+    const updated = {
+      ...existing,
+      photos: [...currentPhotos, ...newPhotos],
+      updatedAt: new Date().toISOString(),
+    };
+    memoryStore[index] = updated;
+    return updated;
+  },
+
+  async deletePhoto(id: string, photoIndex: number) {
+    if (this.isMongoConnected()) {
+      const place = await (PlaceModel as any).findById(id);
+      if (!place) return null;
+      if (Array.isArray(place.photos) && photoIndex >= 0 && photoIndex < place.photos.length) {
+        place.photos.splice(photoIndex, 1);
+        await place.save();
+      }
+      return place.toObject();
+    }
+
+    const index = memoryStore.findIndex((p) => p._id === id || p.id === id);
+    if (index === -1) return null;
+
+    const existing = memoryStore[index];
+    const currentPhotos = Array.isArray(existing.photos) ? [...existing.photos] : [];
+    if (photoIndex >= 0 && photoIndex < currentPhotos.length) {
+      currentPhotos.splice(photoIndex, 1);
+    }
+    const updated = {
+      ...existing,
+      photos: currentPhotos,
+      updatedAt: new Date().toISOString(),
+    };
+    memoryStore[index] = updated;
+    return updated;
   },
 
   async updatePlace(id, data) {
