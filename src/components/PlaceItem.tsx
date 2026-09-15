@@ -15,6 +15,7 @@ import {
   X,
   Loader2,
   Maximize2,
+  Star,
 } from 'lucide-react';
 import { Place } from '../types';
 import { compressImage } from '../utils/imageCompressor';
@@ -189,14 +190,21 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
 
         {/* Right Status Pill & Expand Trigger */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {place.priority === 'imprescindible' && (
+            <span className="hidden xs:inline-flex items-center gap-0.5 text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800">
+              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+              <span>TOP</span>
+            </span>
+          )}
+
           <span
-            className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
+            className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
               place.visited
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60'
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700'
             }`}
           >
-            {place.visited ? 'Visited' : 'Pending'}
+            {place.visited ? 'Visitado' : 'Pendiente'}
           </span>
 
           <button

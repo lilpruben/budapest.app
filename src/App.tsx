@@ -55,7 +55,8 @@ export default function App() {
     return localStorage.getItem('budapest_filters_collapsed') === 'true';
   });
   const [isStatsCollapsed, setIsStatsCollapsed] = useState<boolean>(() => {
-    return localStorage.getItem('budapest_stats_collapsed') === 'true';
+    const stored = localStorage.getItem('budapest_stats_collapsed');
+    return stored !== null ? stored === 'true' : true;
   });
 
   // Group by category with collapsible sections in list view
@@ -557,12 +558,8 @@ export default function App() {
 
   return (
     <div className="bg-slate-100 dark:bg-slate-950 w-full min-h-[100dvh] flex items-center justify-center font-sans antialiased overflow-x-hidden p-0 sm:p-4 sm:py-6 transition-colors">
-      {/* Phone Device Shell container matching High Density Theme */}
-      <div className="w-full max-w-[440px] h-[100dvh] sm:h-[840px] sm:max-h-[94vh] bg-white dark:bg-slate-900 sm:shadow-2xl sm:rounded-[38px] sm:border-[8px] sm:border-slate-800 dark:sm:border-slate-800 flex flex-col relative overflow-hidden transition-colors">
-        {/* Top Speaker notch on desktop frame */}
-        <div className="hidden sm:flex h-5 w-1/3 bg-slate-800 absolute top-0 left-1/2 -translate-x-1/2 rounded-b-xl z-30 items-end justify-center pb-0.5">
-          <div className="w-10 h-0.5 bg-slate-700 rounded-full" />
-        </div>
+      {/* Modern Responsive App Canvas */}
+      <div className="w-full max-w-xl md:max-w-2xl min-h-[100dvh] sm:min-h-0 sm:h-[880px] sm:max-h-[94vh] bg-white dark:bg-slate-900 sm:shadow-2xl sm:rounded-3xl sm:border sm:border-slate-200/80 dark:sm:border-slate-800 flex flex-col relative overflow-hidden transition-colors">
 
         {/* High Density Header - Collapsible */}
         <Header
