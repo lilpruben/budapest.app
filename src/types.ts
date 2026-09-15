@@ -25,6 +25,12 @@ export interface Place {
   visitedAt?: string | null;
   notes?: string;
   photos?: string[];
+  website?: string;
+  phone?: string;
+  price?: string;
+  openingHours?: string;
+  metroOrTransit?: string;
+  priceCategory?: 'free' | 'museum' | 'food' | 'bar' | 'transport' | 'hotel';
   createdAt?: string;
   updatedAt?: string;
 }

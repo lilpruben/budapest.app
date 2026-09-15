@@ -14,6 +14,12 @@ export interface IPlace {
   visitedAt?: Date | null;
   notes?: string;
   photos?: string[];
+  website?: string;
+  phone?: string;
+  price?: string;
+  openingHours?: string;
+  metroOrTransit?: string;
+  priceCategory?: 'free' | 'museum' | 'food' | 'bar' | 'transport' | 'hotel';
 }
 
 const PlaceSchema = new Schema<IPlace>(
@@ -66,6 +72,31 @@ const PlaceSchema = new Schema<IPlace>(
     tip: {
       type: String,
       default: '',
+    },
+    website: {
+      type: String,
+      default: '',
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    price: {
+      type: String,
+      default: '',
+    },
+    openingHours: {
+      type: String,
+      default: '',
+    },
+    metroOrTransit: {
+      type: String,
+      default: '',
+    },
+    priceCategory: {
+      type: String,
+      enum: ['free', 'museum', 'food', 'bar', 'transport', 'hotel'],
+      default: 'free',
     },
     visitedAt: {
       type: Date,

@@ -17,6 +17,7 @@ interface PlaceCategoryGroupProps {
   onDeletePhoto?: (id: string, photoIndex: number) => Promise<void>;
   isAdmin?: boolean;
   onOpenCheckpointModal?: (place: Place, isExchanging: boolean) => void;
+  onOpenDetails?: (place: Place) => void;
 }
 
 export const PlaceCategoryGroup: React.FC<PlaceCategoryGroupProps> = ({
@@ -33,6 +34,7 @@ export const PlaceCategoryGroup: React.FC<PlaceCategoryGroupProps> = ({
   onDeletePhoto,
   isAdmin = false,
   onOpenCheckpointModal,
+  onOpenDetails,
 }) => {
   if (places.length === 0) return null;
 
@@ -107,6 +109,7 @@ export const PlaceCategoryGroup: React.FC<PlaceCategoryGroupProps> = ({
               onDeletePhoto={onDeletePhoto}
               isAdmin={isAdmin}
               onOpenCheckpointModal={onOpenCheckpointModal}
+              onOpenDetails={onOpenDetails}
             />
           ))}
         </div>

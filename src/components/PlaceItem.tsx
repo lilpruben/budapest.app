@@ -16,6 +16,14 @@ import {
   Loader2,
   Maximize2,
   Star,
+  Globe,
+  Phone,
+  Coins,
+  Info,
+  Sparkles,
+  Ticket,
+  Utensils,
+  Bus,
 } from 'lucide-react';
 import { Place } from '../types';
 import { compressImage } from '../utils/imageCompressor';
@@ -29,6 +37,7 @@ interface PlaceItemProps {
   onDeletePhoto?: (id: string, photoIndex: number) => Promise<void>;
   isAdmin?: boolean;
   onOpenCheckpointModal?: (place: Place, isExchanging: boolean) => void;
+  onOpenDetails?: (place: Place) => void;
 }
 
 export const PlaceItem: React.FC<PlaceItemProps> = ({
@@ -40,6 +49,7 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
   onDeletePhoto,
   isAdmin = false,
   onOpenCheckpointModal,
+  onOpenDetails,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [notes, setNotes] = useState(place.notes || '');
@@ -183,12 +193,31 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-            {place.locationName || `${place.category.toUpperCase()} • Budapest`}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap mt-0.5">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              {place.locationName || `${place.category.toUpperCase()} • Budapest`}
+            </p>
+            {place.price && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/60 truncate max-w-[170px]">
+                {place.price.includes('Gratis') || place.price.includes('gratuito')
+                  ? 'Gratis'
+                  : place.price.split('|')[0].trim()}
+              </span>
+            )}
+            {place.phone && (
+              <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                <Phone className="w-2.5 h-2.5" /> Tel
+              </span>
+            )}
+            {place.website && (
+              <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] text-blue-600 dark:text-blue-400 font-mono">
+                <Globe className="w-2.5 h-2.5" /> Web
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Right Status Pill & Expand Trigger */}
+        {/* Right Status Pill, Details Button & Expand Trigger */}
         <div className="flex items-center gap-1.5 shrink-0">
           {place.priority === 'imprescindible' && (
             <span className="hidden xs:inline-flex items-center gap-0.5 text-[9px] font-mono px-1.5 py-0.5 rounded-full font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800">
@@ -206,6 +235,21 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
           >
             {place.visited ? 'Visitado' : 'Pendiente'}
           </span>
+
+          {/* Direct Details Modal Trigger Button */}
+          <button
+            id={`details-btn-${place._id}`}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDetails?.(place);
+            }}
+            className="px-2 py-1 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition-all flex items-center gap-1 active:scale-95 shadow-2xs"
+            title="Ver detalles: teléfono, web, precios y horarios"
+          >
+            <Info className="w-3.5 h-3.5 text-blue-500" />
+            <span className="hidden sm:inline">Detalles</span>
+          </button>
 
           <button
             type="button"
@@ -250,6 +294,119 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
               </div>
             </div>
           )}
+
+          {/* Practical Info Card: Web, Phone, Cost & Hours */}
+          <div className="p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-2.5 shadow-2xs">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <Info className="w-3.5 h-3.5 text-blue-500" />
+                <span>Datos Prácticos: Precios, Web & Contacto</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenDetails?.(place)}
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                <span>Ver ficha completa</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              {/* Cost / Price */}
+              {place.price && (
+                <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-amber-950 dark:text-amber-200 flex items-start gap-2">
+                  <Coins className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-[10px] uppercase text-amber-800 dark:text-amber-300">
+                      ¿Cuánto suele costar?
+                    </span>
+                    <span className="leading-snug">{place.price}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Phone call */}
+              {place.phone ? (
+                <div className="p-2.5 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-emerald-950 dark:text-emerald-200 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="font-bold block text-[10px] uppercase text-emerald-800 dark:text-emerald-300">
+                        Teléfono
+                      </span>
+                      <a
+                        href={`tel:${place.phone.replace(/\s+/g, '')}`}
+                        className="font-mono text-xs hover:underline text-emerald-700 dark:text-emerald-300 font-semibold truncate block"
+                      >
+                        {place.phone}
+                      </a>
+                    </div>
+                  </div>
+                  <a
+                    href={`tel:${place.phone.replace(/\s+/g, '')}`}
+                    className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shrink-0 transition-colors"
+                  >
+                    Llamar
+                  </a>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  <span className="text-[11px]">Sin teléfono registrado</span>
+                </div>
+              )}
+
+              {/* Official Website */}
+              {place.website ? (
+                <div className="p-2.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 text-blue-950 dark:text-blue-200 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="font-bold block text-[10px] uppercase text-blue-800 dark:text-blue-300">
+                        Página Web
+                      </span>
+                      <a
+                        href={place.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs hover:underline text-blue-700 dark:text-blue-300 font-semibold truncate block"
+                      >
+                        Visitar web oficial
+                      </a>
+                    </div>
+                  </div>
+                  <a
+                    href={place.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shrink-0 transition-colors"
+                    title="Abrir web"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  <span className="text-[11px]">Acceso público libre</span>
+                </div>
+              )}
+
+              {/* Opening Hours */}
+              {place.openingHours && (
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                  <Clock className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-[10px] uppercase text-slate-500 dark:text-slate-400">
+                      Horarios
+                    </span>
+                    <span className="leading-snug">{place.openingHours}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Meta specs: Location, time */}
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">

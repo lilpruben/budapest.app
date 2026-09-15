@@ -85,16 +85,45 @@ export async function connectDatabase(): Promise<void> {
       await PlaceModel.insertMany(BUDAPEST_SEED_PLACES as any);
       console.log('[DB] Seeding completed successfully.');
     } else {
-      console.log(`[DB] Found ${count} existing Budapest places in MongoDB. Verifying complete list of 40 sites...`);
-      // Ensure all 40 sites from the shared list exist without overwriting existing visited state
+      console.log(`[DB] Found ${count} existing Budapest places in MongoDB. Verifying complete list of 40 sites and enriching details...`);
+      // Ensure all 40 sites from the shared list exist and have latest details without overwriting visited or user notes/photos
       let added = 0;
       for (const place of BUDAPEST_SEED_PLACES) {
-        const exists = await PlaceModel.findOne({
+        const existing = await PlaceModel.findOne({
           $or: [{ title: place.title }, { originalName: place.originalName }],
         });
-        if (!exists) {
+        if (!existing) {
           await PlaceModel.create(place);
           added++;
+        } else {
+          let needsUpdate = false;
+          if (place.website && existing.website !== place.website) {
+            existing.website = place.website;
+            needsUpdate = true;
+          }
+          if (place.phone && existing.phone !== place.phone) {
+            existing.phone = place.phone;
+            needsUpdate = true;
+          }
+          if (place.price && existing.price !== place.price) {
+            existing.price = place.price;
+            needsUpdate = true;
+          }
+          if (place.openingHours && existing.openingHours !== place.openingHours) {
+            existing.openingHours = place.openingHours;
+            needsUpdate = true;
+          }
+          if (place.metroOrTransit && existing.metroOrTransit !== place.metroOrTransit) {
+            existing.metroOrTransit = place.metroOrTransit;
+            needsUpdate = true;
+          }
+          if (place.priceCategory && existing.priceCategory !== place.priceCategory) {
+            existing.priceCategory = place.priceCategory;
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await existing.save();
+          }
         }
       }
       if (added > 0) {
@@ -222,6 +251,12 @@ export const dbService: DBService = {
       locationName: data.locationName || '',
       googleMapsQuery: data.googleMapsQuery || data.title,
       tip: data.tip || '',
+      website: data.website || '',
+      phone: data.phone || '',
+      price: data.price || '',
+      openingHours: data.openingHours || '',
+      metroOrTransit: data.metroOrTransit || '',
+      priceCategory: data.priceCategory || 'free',
       visitedAt: data.visited ? now : null,
       notes: data.notes || '',
       photos: Array.isArray(data.photos) ? data.photos : [],

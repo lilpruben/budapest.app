@@ -13,6 +13,11 @@ interface AddPlaceModalProps {
     priority: PlacePriority;
     locationName?: string;
     tip?: string;
+    website?: string;
+    phone?: string;
+    price?: string;
+    openingHours?: string;
+    metroOrTransit?: string;
   }) => Promise<void>;
 }
 
@@ -28,6 +33,11 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
   const [description, setDescription] = useState('');
   const [locationName, setLocationName] = useState('');
   const [tip, setTip] = useState('');
+  const [website, setWebsite] = useState('');
+  const [phone, setPhone] = useState('');
+  const [price, setPrice] = useState('');
+  const [openingHours, setOpeningHours] = useState('');
+  const [metroOrTransit, setMetroOrTransit] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -51,6 +61,11 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
         description: description.trim(),
         locationName: locationName.trim() || undefined,
         tip: tip.trim() || undefined,
+        website: website.trim() || undefined,
+        phone: phone.trim() || undefined,
+        price: price.trim() || undefined,
+        openingHours: openingHours.trim() || undefined,
+        metroOrTransit: metroOrTransit.trim() || undefined,
       });
 
       // Reset
@@ -59,6 +74,11 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
       setDescription('');
       setLocationName('');
       setTip('');
+      setWebsite('');
+      setPhone('');
+      setPrice('');
+      setOpeningHours('');
+      setMetroOrTransit('');
       onClose();
     } catch (err: any) {
       setError(err?.message || 'Error al guardar el lugar');
@@ -200,6 +220,83 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
               placeholder="Ej. Distrito VII, cerca de Deák Ferenc tér"
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium"
             />
+          </div>
+
+          {/* Pricing / Cost */}
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+              ¿Cuánto suele costar? (Entrada, comer o consumición)
+            </label>
+            <input
+              id="new-place-price"
+              type="text"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Ej. Gratis | Comer: 3.500-6.000 HUF (~9-15 €) | Entrada: 5.000 HUF"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium"
+            />
+          </div>
+
+          {/* Web & Phone Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Página web
+              </label>
+              <input
+                id="new-place-website"
+                type="url"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium font-mono text-[11px]"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Teléfono de contacto
+              </label>
+              <input
+                id="new-place-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+36 1 ..."
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium font-mono text-[11px]"
+              />
+            </div>
+          </div>
+
+          {/* Hours & Metro Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Horarios habituales
+              </label>
+              <input
+                id="new-place-hours"
+                type="text"
+                value={openingHours}
+                onChange={(e) => setOpeningHours(e.target.value)}
+                placeholder="Ej. Todos los días 9:00 - 19:00"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Metro / Parada
+              </label>
+              <input
+                id="new-place-metro"
+                type="text"
+                value={metroOrTransit}
+                onChange={(e) => setMetroOrTransit(e.target.value)}
+                placeholder="Ej. Metro M1 Hősök tere"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium"
+              />
+            </div>
           </div>
 
           <div>

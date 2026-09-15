@@ -10,6 +10,7 @@ import { ServerModal } from './components/ServerModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { TripRecapModal } from './components/TripRecapModal';
 import { CheckpointModal } from './components/CheckpointModal';
+import { PlaceDetailModal } from './components/PlaceDetailModal';
 import { EmptyState } from './components/EmptyState';
 import {
   Place,
@@ -172,6 +173,15 @@ export default function App() {
   const [isCheckpointModalOpen, setIsCheckpointModalOpen] = useState(false);
   const [isExchangingPhoto, setIsExchangingPhoto] = useState(false);
 
+  // Tourist Site Detail Modal state
+  const [detailPlace, setDetailPlace] = useState<Place | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const handleOpenDetails = (place: Place) => {
+    setDetailPlace(place);
+    setIsDetailModalOpen(true);
+  };
+
   const handleOpenCheckpointModal = (place: Place, isExchanging: boolean) => {
     setCheckpointPlace(place);
     setIsExchangingPhoto(isExchanging);
@@ -268,6 +278,15 @@ export default function App() {
           : p
       )
     );
+    setDetailPlace((prev) =>
+      prev && prev._id === id
+        ? {
+            ...prev,
+            visited: nextVisited,
+            visitedAt: nextVisited ? new Date().toISOString() : null,
+          }
+        : prev
+    );
 
     try {
       const res = await fetch(`/api/places/${id}/toggle`, {
@@ -324,6 +343,9 @@ export default function App() {
       if (res.ok) {
         setPlaces((prev) =>
           prev.map((p) => (p._id === id ? { ...p, notes } : p))
+        );
+        setDetailPlace((prev) =>
+          prev && prev._id === id ? { ...prev, notes } : prev
         );
       }
     } catch (err) {
@@ -407,6 +429,11 @@ export default function App() {
     priority: PlacePriority;
     locationName?: string;
     tip?: string;
+    website?: string;
+    phone?: string;
+    price?: string;
+    openingHours?: string;
+    metroOrTransit?: string;
   }) => {
     const res = await fetch('/api/places', {
       method: 'POST',
@@ -676,6 +703,7 @@ export default function App() {
               places={filteredPlaces}
               allPlaces={places}
               onToggleVisited={handleToggleVisited}
+              onOpenDetails={handleOpenDetails}
             />
           ) : filteredPlaces.length > 0 ? (
             groupByCategory ? (
@@ -696,6 +724,7 @@ export default function App() {
                     onDeletePhoto={handleDeletePhoto}
                     isAdmin={isAdmin}
                     onOpenCheckpointModal={handleOpenCheckpointModal}
+                    onOpenDetails={handleOpenDetails}
                   />
                 ))}
               </div>
@@ -712,6 +741,7 @@ export default function App() {
                     onDeletePhoto={handleDeletePhoto}
                     isAdmin={isAdmin}
                     onOpenCheckpointModal={handleOpenCheckpointModal}
+                    onOpenDetails={handleOpenDetails}
                   />
                 ))}
               </div>
@@ -865,6 +895,25 @@ export default function App() {
         isExchanging={isExchangingPhoto}
         onClose={() => setIsCheckpointModalOpen(false)}
         onConfirmPhoto={handleConfirmCheckpointPhoto}
+      />
+
+      {/* Place Detail & Technical Specs Modal */}
+      <PlaceDetailModal
+        isOpen={isDetailModalOpen}
+        place={detailPlace}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setDetailPlace(null);
+        }}
+        onToggleVisited={async (id, current) => {
+          await handleToggleVisited(id, current);
+        }}
+        onSaveNotes={async (id, notes) => {
+          await handleSaveNotes(id, notes);
+        }}
+        onOpenCheckpointPhoto={(p) => {
+          handleOpenCheckpointModal(p, false);
+        }}
       />
     </div>
   );

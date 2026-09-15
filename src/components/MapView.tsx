@@ -11,6 +11,10 @@ import {
   Building2,
   Maximize2,
   Layers,
+  Phone,
+  Globe,
+  Coins,
+  Info,
 } from 'lucide-react';
 import { Place, PlaceCategory } from '../types';
 
@@ -18,6 +22,7 @@ interface MapViewProps {
   places: Place[];
   allPlaces: Place[];
   onToggleVisited: (id: string, current: boolean) => void;
+  onOpenDetails?: (place: Place) => void;
 }
 
 const CATEGORY_NAMES: Record<PlaceCategory, string> = {
@@ -42,6 +47,7 @@ export const MapView: React.FC<MapViewProps> = ({
   places,
   allPlaces,
   onToggleVisited,
+  onOpenDetails,
 }) => {
   const displayPlaces = places.length > 0 ? places : allPlaces;
 
@@ -375,8 +381,56 @@ export const MapView: React.FC<MapViewProps> = ({
                 </div>
               )}
 
+              {/* Price & Costs Info snippet */}
+              {selectedPlace.price && (
+                <div className="flex items-start gap-2 text-xs bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 p-2.5 rounded-xl text-emerald-950 dark:text-emerald-200">
+                  <Coins className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="font-semibold block text-[11px] uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+                      Precio estimado:
+                    </strong>
+                    <p className="leading-relaxed">{selectedPlace.price}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Direct Action Buttons */}
               <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                {onOpenDetails && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenDetails(selectedPlace)}
+                    className="flex-1 sm:flex-initial py-2 px-3.5 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    <Info className="w-3.5 h-3.5 text-blue-400 dark:text-blue-600" />
+                    <span>Ver Ficha Completa</span>
+                  </button>
+                )}
+
+                {selectedPlace.phone && (
+                  <a
+                    href={`tel:${selectedPlace.phone.replace(/\s+/g, '')}`}
+                    className="py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border border-emerald-200 dark:border-emerald-800"
+                    title={`Llamar al ${selectedPlace.phone}`}
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Llamar</span>
+                  </a>
+                )}
+
+                {selectedPlace.website && (
+                  <a
+                    href={selectedPlace.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border border-blue-200 dark:border-blue-800"
+                    title="Página web oficial"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Web</span>
+                  </a>
+                )}
+
                 <a
                   href={directionsUrl}
                   target="_blank"
@@ -384,7 +438,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   className="flex-1 sm:flex-initial py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  <span>Cómo llegar (Ruta)</span>
+                  <span>Ruta</span>
                 </a>
                 <a
                   href={externalUrl}
@@ -393,7 +447,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   className="flex-1 sm:flex-initial py-2 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Ver en Google Maps</span>
+                  <span>Google Maps</span>
                 </a>
               </div>
             </div>

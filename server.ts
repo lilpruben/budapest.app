@@ -51,7 +51,22 @@ async function startServer() {
   // Create new place
   app.post('/api/places', async (req: Request, res: Response) => {
     try {
-      const { title, category, description, priority, locationName, tip, originalName, notes } = req.body;
+      const {
+        title,
+        category,
+        description,
+        priority,
+        locationName,
+        tip,
+        originalName,
+        notes,
+        website,
+        phone,
+        price,
+        openingHours,
+        metroOrTransit,
+        priceCategory,
+      } = req.body;
       if (!title || !title.trim()) {
         res.status(400).json({ ok: false, error: 'El nombre del lugar es requerido.' });
         return;
@@ -66,6 +81,12 @@ async function startServer() {
         locationName: locationName?.trim() || '',
         tip: tip?.trim() || '',
         notes: notes?.trim() || '',
+        website: website?.trim() || '',
+        phone: phone?.trim() || '',
+        price: price?.trim() || '',
+        openingHours: openingHours?.trim() || '',
+        metroOrTransit: metroOrTransit?.trim() || '',
+        priceCategory: priceCategory || 'free',
         visited: false,
       });
 

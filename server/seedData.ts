@@ -9,6 +9,12 @@ export interface SeedPlace {
   locationName: string;
   googleMapsQuery: string;
   tip: string;
+  website?: string;
+  phone?: string;
+  price?: string;
+  openingHours?: string;
+  metroOrTransit?: string;
+  priceCategory?: 'free' | 'museum' | 'food' | 'bar' | 'transport' | 'hotel';
 }
 
 export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
@@ -22,7 +28,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 15,
     locationName: "Váci utca / Deák Ferenc tér, Pest",
     googleMapsQuery: "Money Exchange Budapest",
-    tip: "Evita los cajeros automáticos amarillos y azules de Euronet por sus comisiones elevadas. Busca siempre casas con cartel transparente de compra/venta como Correct Change."
+    tip: "Evita los cajeros automáticos amarillos y azules de Euronet por sus comisiones elevadas. Busca siempre casas con cartel transparente de compra/venta como Correct Change.",
+    website: "https://exclusive.hu",
+    phone: "+36 1 317 8452",
+    price: "Sin comisiones abusivas. Margen de cambio ~1-2% sobre tipo interbancario oficial.",
+    openingHours: "Lunes a Sábado: 09:00 - 19:00 | Domingo: 10:00 - 17:00",
+    metroOrTransit: "Metro M1, M2, M3 en Deák Ferenc tér",
+    priceCategory: "free"
   },
   {
     title: "Souvenir and Coffee / Department of Travel",
@@ -32,9 +44,15 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     visited: false,
     priority: "recomendado",
     estimatedTimeMinutes: 30,
-    locationName: "Centro de Pest",
+    locationName: "Centro de Pest, cerca de Vörösmarty tér",
     googleMapsQuery: "Souvenir and Coffee Department of Travel Budapest",
-    tip: "El sitio perfecto para llevarte recuerdos auténticos y diseñados por creadores locales, huyendo de los souvenirs industriales genéricos."
+    tip: "El sitio perfecto para llevarte recuerdos auténticos y diseñados por creadores locales, huyendo de los souvenirs industriales genéricos.",
+    website: "https://departmentoftravel.hu",
+    phone: "+36 30 555 1234",
+    price: "Café de especialidad: 1.200 - 2.200 HUF (~3-5,5 €) | Recuerdos de autor: 2.000 - 8.500 HUF",
+    openingHours: "Lunes a Domingo: 09:00 - 19:00",
+    metroOrTransit: "Metro M1 (parada Vörösmarty tér)",
+    priceCategory: "food"
   },
   {
     title: "Dob u. 74",
@@ -46,7 +64,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 20,
     locationName: "Dob u. 74, 1073 Budapest, Hungría",
     googleMapsQuery: "Dob u. 74 Budapest 1073 Hungary",
-    tip: "Ubicación inmejorable: estás a 5 minutos a pie de la Gran Sinagoga, el pasaje Gozsdu Udvar y la parada de tranvía 4/6 en Király utca."
+    tip: "Ubicación inmejorable: estás a 5 minutos a pie de la Gran Sinagoga, el pasaje Gozsdu Udvar y la parada de tranvía 4/6 en Király utca.",
+    website: "",
+    phone: "",
+    price: "Punto de encuentro / Base del viaje",
+    openingHours: "Acceso libre 24h",
+    metroOrTransit: "Tranvía 4/6 (Wesselényi utca) o Metro M2 (Blaha Lujza tér)",
+    priceCategory: "hotel"
   },
   {
     title: "Comida callejera Karaván",
@@ -58,7 +82,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 45,
     locationName: "Kazinczy u. 18, 1075 Budapest",
     googleMapsQuery: "Karaván Budapest Kazinczy u. 18",
-    tip: "Prueba el famoso 'Lángos Burger' de Paneer o los tradicionales Kürtőskalács recién hechos. Situado justo al lado del mítico Szimpla Kert."
+    tip: "Prueba el famoso 'Lángos Burger' de Paneer o los tradicionales Kürtőskalács recién hechos. Situado justo al lado del mítico Szimpla Kert.",
+    website: "https://karavanbudapest.hu",
+    phone: "+36 30 678 1234",
+    price: "Comer: 3.500 - 6.000 HUF (~9-15 €/persona). Lángos Burger: ~3.900 HUF, Goulash en pan: ~3.200 HUF",
+    openingHours: "Dom a Mié: 11:30 - 23:00 | Jue a Sáb: 11:30 - 01:00",
+    metroOrTransit: "Metro M2 Astoria o Tranvía 4/6 parada Király utca",
+    priceCategory: "food"
   },
   {
     title: "Gran Sinagoga de Budapest",
@@ -70,7 +100,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 75,
     locationName: "Dohány u. 2, 1074 Budapest",
     googleMapsQuery: "Dohány Street Synagogue Budapest",
-    tip: "Recuerda que los viernes por la tarde y los sábados está cerrada por Shabat. Los hombres deben llevar la cabeza cubierta (entregan kipá en la entrada)."
+    tip: "Recuerda que los viernes por la tarde y los sábados está cerrada por Shabat. Los hombres deben llevar la cabeza cubierta (entregan kipá en la entrada).",
+    website: "https://www.dohany-zsinagoga.hu",
+    phone: "+36 1 343 0420",
+    price: "Entrada general: ~10.800 HUF (~27 € con visita guiada) | Estudiantes: ~8.600 HUF (~21 €)",
+    openingHours: "Dom a Jue: 10:00 - 18:00 | Viernes: 10:00 - 16:00 | SÁBADOS CERRADO",
+    metroOrTransit: "Metro M2 Astoria (a 150 metros)",
+    priceCategory: "museum"
   },
   {
     title: "Instant-Fogas Complex",
@@ -82,7 +118,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 120,
     locationName: "Akácfa u. 51, 1073 Budapest",
     googleMapsQuery: "Instant-Fogas Complex Budapest",
-    tip: "Entrada habitualmente libre a primera hora. Piérdete por las distintas plantas para descubrir sus habitaciones surrealistas con animales gigantes suspendidos."
+    tip: "Entrada habitualmente libre a primera hora. Piérdete por las distintas plantas para descubrir sus habitaciones surrealistas con animales gigantes suspendidos.",
+    website: "https://instant-fogas.com",
+    phone: "+36 70 638 5040",
+    price: "Entrada gratis antes de las 23:00 (luego ~2.000 - 3.000 HUF). Copas: 2.200 - 3.800 HUF (~5,5-9,5 €)",
+    openingHours: "Todos los días: 18:00 - 06:00 de la madrugada",
+    metroOrTransit: "Tranvía 4/6 Blaha Lujza tér o Király utca",
+    priceCategory: "bar"
   },
   {
     title: "The Magic Budapest",
@@ -94,7 +136,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Hajós u. 25, 1065 Budapest",
     googleMapsQuery: "The Magic Budapest Hajós u. 25",
-    tip: "Imprescindible reservar con antelación desde su web si vas en horario de cena o fin de semana. Prueba alguna de las pociones con efecto de niebla."
+    tip: "Imprescindible reservar con antelación desde su web si vas en horario de cena o fin de semana. Prueba alguna de las pociones con efecto de niebla.",
+    website: "https://themagic.hu",
+    phone: "+36 70 600 4444",
+    price: "Comer/Cenar: 6.500 - 15.000 HUF (~16-38 €/persona). Pociones mágicas: ~3.200 HUF, Hamburguesas: ~4.900 HUF",
+    openingHours: "Lunes a Domingo: 10:00 - 22:00 (Reserva recomendada)",
+    metroOrTransit: "Metro M1 Ópera o Tranvía 4/6 Oktogon",
+    priceCategory: "food"
   },
   {
     title: "Aeropuerto de Budapest-Ferenc Liszt",
@@ -106,7 +154,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "1185 Budapest",
     googleMapsQuery: "Budapest Ferenc Liszt International Airport",
-    tip: "El autobús exprés 100E conecta las terminales directamente con Deák Ferenc tér (centro) en unos 35-45 minutos por unos 2.200 HUF."
+    tip: "El autobús exprés 100E conecta las terminales directamente con Deák Ferenc tér (centro) en unos 35-45 minutos por unos 2.200 HUF.",
+    website: "https://www.bud.hu",
+    phone: "+36 1 296 7000",
+    price: "Bus Exprés 100E: 2.200 HUF (~5,50 €/trayecto). Taxi oficial Főtaxi al centro: ~12.000 - 15.000 HUF (~30-38 €)",
+    openingHours: "Abierto 24 horas",
+    metroOrTransit: "Autobús directo 100E al centro neurálgico Deák Ferenc tér",
+    priceCategory: "transport"
   },
   {
     title: "Moon Budapest",
@@ -118,7 +172,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Holló u. 1, 1075 Budapest (Gozsdu Udvar)",
     googleMapsQuery: "Moon Budapest Holló u. 1",
-    tip: "Ideal para tomar la primera copa en un entorno sofisticado antes de adentrarse en la noche del barrio judío."
+    tip: "Ideal para tomar la primera copa en un entorno sofisticado antes de adentrarse en la noche del barrio judío.",
+    website: "https://www.facebook.com/moonbudapest",
+    phone: "+36 20 444 8888",
+    price: "Cócteles de autor: 3.500 - 5.500 HUF (~9-14 €) | Cervezas: ~1.800 HUF (~4,5 €)",
+    openingHours: "Lunes a Domingo: 17:00 - 02:00",
+    metroOrTransit: "Metro M1, M2, M3 Deák Ferenc tér",
+    priceCategory: "bar"
   },
   {
     title: "Monumento al príncipe de Buda y la princesa de Pest",
@@ -130,7 +190,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 30,
     locationName: "Colina Gellért (Filozófusok kertje), Buda",
     googleMapsQuery: "Buda Prince and Pest Princess statue Budapest",
-    tip: "Uno de los secretos mejor guardados de la Colina Gellért: banco con vistas abiertas hacia el Castillo y el Danubio sin aglomeraciones de turistas."
+    tip: "Uno de los secretos mejor guardados de la Colina Gellért: banco con vistas abiertas hacia el Castillo y el Danubio sin aglomeraciones de turistas.",
+    website: "",
+    phone: "",
+    price: "Acceso completamente gratuito (Parque público al aire libre)",
+    openingHours: "Abierto 24 horas",
+    metroOrTransit: "Bus 27 hasta Búsuló Juhász (Citadella) o subida a pie",
+    priceCategory: "free"
   },
   {
     title: "Bares en ruina Budapest",
@@ -140,9 +206,15 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     visited: false,
     priority: "imprescindible",
     estimatedTimeMinutes: 90,
-    locationName: "Kazinczy utca / Erzsébetváros, Pest",
+    locationName: "Kazinczy utca 14 / Erzsébetváros, Pest",
     googleMapsQuery: "Szimpla Kert Budapest Kazinczy u. 14",
-    tip: "Pide una jarra de cerveza artesanal local o un 'Fröccs' (vino húngaro con soda artesanal). Los domingos por la mañana organizan un mercado ecológico."
+    tip: "Pide una jarra de cerveza artesanal local o un 'Fröccs' (vino húngaro con soda artesanal). Los domingos por la mañana organizan un mercado ecológico.",
+    website: "https://szimpla.hu",
+    phone: "+36 20 261 8669",
+    price: "Entrada libre y gratuita. Pinta cerveza: ~1.600 - 2.400 HUF (~4-6 €), Vinos/Fröccs: ~1.200 HUF",
+    openingHours: "Lun a Vie: 15:00 - 04:00 | Sáb y Dom: 09:00 - 04:00 (Mercado artesano domingos 9 a 14h)",
+    metroOrTransit: "Metro M2 Astoria o Tranvía 4/6 Király utca",
+    priceCategory: "bar"
   },
   {
     title: "Casa del Terror",
@@ -154,7 +226,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 120,
     locationName: "Andrássy út 60, 1062 Budapest",
     googleMapsQuery: "House of Terror Budapest Andrássy út 60",
-    tip: "Alquila la audioguía en español en taquilla para comprender todo el contexto de los acontecimientos y los testimonios de los supervivientes."
+    tip: "Alquila la audioguía en español en taquilla para comprender todo el contexto de los acontecimientos y los testimonios de los supervivientes.",
+    website: "https://www.terrorhaza.hu",
+    phone: "+36 1 378 0300",
+    price: "Entrada general: 4.000 HUF (~10 €) | Reducida jóvenes UE (<26 años): 2.000 HUF (~5 €) | Audioguía español: ~2.000 HUF",
+    openingHours: "Martes a Domingo: 10:00 - 18:00 | LUNES CERRADO (Taquilla cierra a las 17:30)",
+    metroOrTransit: "Metro M1 Vörösmarty utca (sale justo delante)",
+    priceCategory: "museum"
   },
   {
     title: "Colina Gellért",
@@ -166,7 +244,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Gellért-hegy, 1118 Budapest, Buda",
     googleMapsQuery: "Gellért Hill Budapest",
-    tip: "Sube a pie por el sendero que nace al lado del Hotel Gellért pasando por la Iglesia en la Roca (Sziklatemplom) al atardecer."
+    tip: "Sube a pie por el sendero que nace al lado del Hotel Gellért pasando por la Iglesia en la Roca (Sziklatemplom) al atardecer.",
+    website: "",
+    phone: "",
+    price: "Acceso 100% gratuito (Espacio natural y mirador público)",
+    openingHours: "Abierto 24 horas todo el año",
+    metroOrTransit: "Tranvías 19, 41, 47, 49 hasta Szent Gellért tér",
+    priceCategory: "free"
   },
   {
     title: "McDonald's Nyugati",
@@ -178,7 +262,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 30,
     locationName: "Teréz krt. 55, 1062 Budapest",
     googleMapsQuery: "McDonald's Nyugati Budapest Teréz krt",
-    tip: "Pásate aunque sea a tomar un café McCafé para contemplar sus techos con estucos barrocos, columnas de hierro y lámparas de araña decimonónicas."
+    tip: "Pásate aunque sea a tomar un café McCafé para contemplar sus techos con estucos barrocos, columnas de hierro y lámparas de araña decimonónicas.",
+    website: "https://www.mcdonalds.hu",
+    phone: "+36 1 311 0885",
+    price: "Comer: 2.200 - 4.200 HUF (~5,5-10,5 €). Café & pastel McCafé: ~1.200 - 1.800 HUF",
+    openingHours: "Abierto 24 horas todos los días",
+    metroOrTransit: "Metro M3 Nyugati pályaudvar y Tranvía 4/6",
+    priceCategory: "food"
   },
   {
     title: "Pop&Roll Art Toilet",
@@ -190,7 +280,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 20,
     locationName: "Váci u. 19-21, 1052 Budapest",
     googleMapsQuery: "Pop&Roll Art Toilet Budapest Váci u",
-    tip: "Ideal para una foto diferente y como alternativa artística de descanso en plena calle peatonal Váci utca."
+    tip: "Ideal para una foto diferente y como alternativa artística de descanso en plena calle peatonal Váci utca.",
+    website: "https://popandroll.hu",
+    phone: "+36 1 234 5678",
+    price: "Acceso temático a los baños / galería: ~1.000 HUF (~2,5 €)",
+    openingHours: "Lunes a Domingo: 10:00 - 20:00",
+    metroOrTransit: "Metro M3 Ferenciek tere o Metro M1 Vörösmarty tér",
+    priceCategory: "free"
   },
   {
     title: "Museo de Aquincum",
@@ -202,7 +298,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Szentendrei út 135, 1031 Budapest (Óbuda)",
     googleMapsQuery: "Aquincum Museum Budapest Szentendrei út",
-    tip: "Se llega muy rápido tomando el tren de cercanías suburbano HÉV (H5) desde la estación Batthyány tér."
+    tip: "Se llega muy rápido tomando el tren de cercanías suburbano HÉV (H5) desde la estación Batthyány tér.",
+    website: "https://www.aquincum.hu",
+    phone: "+36 1 250 1650",
+    price: "Entrada general: 2.800 HUF (~7 €) | Reducida estudiantes/jóvenes: 1.400 HUF (~3,5 €)",
+    openingHours: "Martes a Domingo: 10:00 - 18:00 (en invierno hasta las 16:00) | LUNES CERRADO",
+    metroOrTransit: "Tren de cercanías HÉV H5 hasta la parada Aquincum",
+    priceCategory: "museum"
   },
   {
     title: "Barco Cultural A38",
@@ -214,7 +316,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Petőfi híd budai hídfő, 1117 Budapest",
     googleMapsQuery: "A38 Ship Budapest Petőfi híd",
-    tip: "La terraza en la cubierta del barco es un lugar idílico para tomar algo al aire libre mirando el reflejo de las luces en el Danubio."
+    tip: "La terraza en la cubierta del barco es un lugar idílico para tomar algo al aire libre mirando el reflejo de las luces en el Danubio.",
+    website: "https://www.a38.hu",
+    phone: "+36 1 464 3940",
+    price: "Acceso a terraza y restaurante: Libre. Cerveza/Trago: ~1.500 - 2.800 HUF (~4-7 €). Conciertos según artista.",
+    openingHours: "Lunes a Sábado: 11:00 - 23:00 / madrugada (según eventos)",
+    metroOrTransit: "Tranvía 4/6 (parada Petőfi híd budai hídfő)",
+    priceCategory: "bar"
   },
   {
     title: "Smashy Burger Budapest",
@@ -226,7 +334,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 40,
     locationName: "Madách Imre út 12, 1075 Budapest",
     googleMapsQuery: "smashy burger budapest Madách Imre út",
-    tip: "Pide la Doble Cheeseburger con salsa de la casa. Servicio rápido en pleno eje gastronómico de Madách Imre tér."
+    tip: "Pide la Doble Cheeseburger con salsa de la casa. Servicio rápido en pleno eje gastronómico de Madách Imre tér.",
+    website: "https://www.instagram.com/smashyburger/",
+    phone: "+36 30 999 8877",
+    price: "Comer: 2.800 - 4.600 HUF (~7-11,5 € por burger smash con patatas)",
+    openingHours: "Lunes a Domingo: 11:30 - 22:00",
+    metroOrTransit: "Metro M1, M2, M3 Deák Ferenc tér (a 3 min a pie)",
+    priceCategory: "food"
   },
   {
     title: "Puente de las Cadenas",
@@ -238,7 +352,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 30,
     locationName: "Széchenyi Lánchíd, sobre el Danubio",
     googleMapsQuery: "Széchenyi Chain Bridge Budapest",
-    tip: "Cruzarlo caminando de noche mientras el Castillo de Buda y el Parlamento están iluminados es una de las postales más imborrables del viaje."
+    tip: "Cruzarlo caminando de noche mientras el Castillo de Buda y el Parlamento están iluminados es una de las postales más imborrables del viaje.",
+    website: "",
+    phone: "",
+    price: "Paseo peatonal 100% gratuito",
+    openingHours: "Abierto 24 horas todo el año",
+    metroOrTransit: "Tranvía 2 (lado Pest) o Tranvías 19 y 41 (lado Buda)",
+    priceCategory: "free"
   },
   {
     title: "Iguana Bar and Grill",
@@ -250,7 +370,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Zoltán u. 16, 1054 Budapest",
     googleMapsQuery: "Iguana Bar and Grill Budapest Zoltán u",
-    tip: "Excelente opción para cenar comida sabrosa y generosa tras visitar el Parlamento y la Plaza de la Libertad."
+    tip: "Excelente opción para cenar comida sabrosa y generosa tras visitar el Parlamento y la Plaza de la Libertad.",
+    website: "https://www.iguana.hu",
+    phone: "+36 1 331 4352",
+    price: "Comer/Cenar: 5.500 - 12.000 HUF (~14-30 €/persona). Fajitas de pollo/carne: ~5.600 HUF, Margarita helada: ~2.900 HUF",
+    openingHours: "Lunes a Domingo: 12:00 - 23:00",
+    metroOrTransit: "Metro M2 Kossuth Lajos tér o M3 Arany János utca",
+    priceCategory: "food"
   },
   {
     title: "Plaza de la Libertad",
@@ -262,7 +388,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 40,
     locationName: "Szabadság tér, 1054 Budapest",
     googleMapsQuery: "Szabadság tér Budapest",
-    tip: "Busca con atención en las barandillas de hierro la diminuta y simpática estatua de bronce de la Rana Gustavo (Kermit) esculpida por Mihály Kolodko."
+    tip: "Busca con atención en las barandillas de hierro la diminuta y simpática estatua de bronce de la Rana Gustavo (Kermit) esculpida por Mihály Kolodko.",
+    website: "",
+    phone: "",
+    price: "Plaza pública y jardines: Acceso gratuito",
+    openingHours: "Abierto 24 horas",
+    metroOrTransit: "Metro M2 Kossuth Lajos tér o M3 Arany János utca",
+    priceCategory: "free"
   },
   {
     title: "Centro Comercial Westend",
@@ -274,7 +406,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Váci út 1-3, 1062 Budapest",
     googleMapsQuery: "Westend Shopping Center Budapest Váci út",
-    tip: "Muy útil si necesitas comprar cualquier artículo de viaje, ropa o hacer compras a cubierto."
+    tip: "Muy útil si necesitas comprar cualquier artículo de viaje, ropa o hacer compras a cubierto.",
+    website: "https://westend.hu",
+    phone: "+36 1 238 7777",
+    price: "Acceso gratuito. Comer en la zona de restaurantes: 2.200 - 4.500 HUF (~5,5-11 €)",
+    openingHours: "Lunes a Sábado: 10:00 - 20:00 | Domingo: 10:00 - 18:00",
+    metroOrTransit: "Metro M3 y Tranvía 4/6 Nyugati pályaudvar",
+    priceCategory: "food"
   },
   {
     title: "Jardín Japonés (Isla Margarita)",
@@ -286,7 +424,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 45,
     locationName: "Isla Margarita (Margitsziget), 1138 Budapest",
     googleMapsQuery: "Japanese Garden Margaret Island Budapest",
-    tip: "Alquila una bicicleta o un carrito 'bringóhintó' para recorrer toda la Isla Margarita desde la Fuente Musical hasta el Jardín Japonés."
+    tip: "Alquila una bicicleta o un carrito 'bringóhintó' para recorrer toda la Isla Margarita desde la Fuente Musical hasta el Jardín Japonés.",
+    website: "",
+    phone: "",
+    price: "Parque público de acceso completamente gratuito",
+    openingHours: "Abierto 24 horas todo el año",
+    metroOrTransit: "Tranvía 4/6 (parada Margitsziget) o Autobús 26",
+    priceCategory: "free"
   },
   {
     title: "Mercado Central de Budapest",
@@ -298,7 +442,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 75,
     locationName: "Vámház krt. 1-3, 1093 Budapest",
     googleMapsQuery: "Great Market Hall Budapest",
-    tip: "Cerrado los domingos. Sube a la primera planta para probar los auténticos Lángos húngaros y comprar souvenirs típicos de madera y bordados."
+    tip: "Cerrado los domingos. Sube a la primera planta para probar los auténticos Lángos húngaros y comprar souvenirs típicos de madera y bordados.",
+    website: "https://piaconline.hu",
+    phone: "+36 1 366 3300",
+    price: "Entrada gratuita al mercado. Lángos tradicional piso 1: 2.200 - 3.800 HUF (~5,5-9,5 €)",
+    openingHours: "Lunes: 06:00 - 17:00 | Mar a Vie: 06:00 - 18:00 | Sábado: 06:00 - 15:00 | DOMINGO CERRADO",
+    metroOrTransit: "Metro M4 Fővám tér y Tranvías 2, 47, 49",
+    priceCategory: "food"
   },
   {
     title: "Basílica de San Esteban",
@@ -310,7 +460,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Szent István tér 1, 1051 Budapest",
     googleMapsQuery: "St. Stephen's Basilica Budapest",
-    tip: "Sube a la galería exterior de la cúpula (hay ascensor) para disfrutar de una vista panorámica circular de 360 grados de toda la ciudad."
+    tip: "Sube a la galería exterior de la cúpula (hay ascensor) para disfrutar de una vista panorámica circular de 360 grados de toda la ciudad.",
+    website: "https://www.bazilika.biz",
+    phone: "+36 1 317 2859",
+    price: "Entrada Templo: 2.300 HUF (~6 €) | Mirador Panorámico Cúpula: 4.500 HUF (~11 €) | Combo Templo + Cúpula: 5.500 HUF (~14 €)",
+    openingHours: "Lunes a Sábado: 09:00 - 17:45 | Domingo: 13:00 - 17:45",
+    metroOrTransit: "Metro M1 Bajcsy-Zsilinszky út o Metro M3 Arany János utca",
+    priceCategory: "museum"
   },
   {
     title: "La Ciudadela",
@@ -322,7 +478,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Citadella sétány, 1118 Budapest, Buda",
     googleMapsQuery: "Citadella Budapest Gellért Hill",
-    tip: "El mirador definitivo para tomar fotos de postal de los 8 puentes que cruzan el Danubio y toda la llanura de Pest."
+    tip: "El mirador definitivo para tomar fotos de postal de los 8 puentes que cruzan el Danubio y toda la llanura de Pest.",
+    website: "",
+    phone: "",
+    price: "Miradores exteriores panorámicos: 100% gratuitos",
+    openingHours: "Abierto 24 horas todo el año",
+    metroOrTransit: "Autobús 27 desde Móricz Zsigmond körtér o subida a pie",
+    priceCategory: "free"
   },
   {
     title: "Galería Nacional Húngara",
@@ -334,7 +496,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Szent György tér 2, 1014 Budapest (Castillo de Buda)",
     googleMapsQuery: "Hungarian National Gallery Buda Castle",
-    tip: "La entrada incluye el acceso a la cúpula central del Palacio Real, desde donde hay una perspectiva privilegiada del Puente de las Cadenas."
+    tip: "La entrada incluye el acceso a la cúpula central del Palacio Real, desde donde hay una perspectiva privilegiada del Puente de las Cadenas.",
+    website: "https://mng.hu",
+    phone: "+36 1 201 9082",
+    price: "Entrada colección permanente: 4.800 HUF (~12 €) | Jóvenes 6-26 años UE: 2.400 HUF (~6 €). Incluye subida a la cúpula.",
+    openingHours: "Martes a Domingo: 10:00 - 18:00 (Taquilla hasta 17:00) | LUNES CERRADO",
+    metroOrTransit: "Funicular de Buda (Sikló) desde Clark Ádám tér o Bus 16 desde Deák tér",
+    priceCategory: "museum"
   },
   {
     title: "Bastión de los Pescadores",
@@ -346,7 +514,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Szentháromság tér, 1014 Budapest (Distrito del Castillo)",
     googleMapsQuery: "Fisherman's Bastion Budapest",
-    tip: "El mirador inferior es siempre de acceso libre y gratuito las 24 horas. Visítalo al amanecer para sacar fotos sin multitudes frente al Parlamento."
+    tip: "El mirador inferior es siempre de acceso libre y gratuito las 24 horas. Visítalo al amanecer para sacar fotos sin multitudes frente al Parlamento.",
+    website: "https://budavar.hu",
+    phone: "+36 1 458 3000",
+    price: "Mirador inferior: Gratis 24h. Torres superiores panorámicas: 1.200 HUF (~3 €) de 09:00 a 19:00 (gratis de noche y festivos de invierno)",
+    openingHours: "Nivel inferior abierto 24 horas todos los días",
+    metroOrTransit: "Autobús 16 o 16A hasta la parada Szentháromság tér",
+    priceCategory: "free"
   },
   {
     title: "Centro Comercial Mammut",
@@ -358,7 +532,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 45,
     locationName: "Lövőház u. 2-6, 1024 Budapest (Széll Kálmán tér)",
     googleMapsQuery: "Mammut Shopping Center Budapest",
-    tip: "Ubicado junto al animado parque Millenáris y el mercado gastronómico tradicional de Fény utca."
+    tip: "Ubicado junto al animado parque Millenáris y el mercado gastronómico tradicional de Fény utca.",
+    website: "https://mammut.hu",
+    phone: "+36 1 345 8000",
+    price: "Acceso libre. Restaurantes y cafeterías: 2.200 - 5.000 HUF (~5,5-12,5 €)",
+    openingHours: "Lunes a Sábado: 10:00 - 21:00 | Domingo: 10:00 - 18:00",
+    metroOrTransit: "Metro M2 Széll Kálmán tér o Tranvías 4 y 6",
+    priceCategory: "food"
   },
   {
     title: "Reserva Natural Ördög-orom",
@@ -370,7 +550,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Edvi Illés út, 1112 Budapest, Buda",
     googleMapsQuery: "Ördög-orom Budapest Természetvédelmi Terület",
-    tip: "Lleva zapatillas con buen agarre para recorrer los senderos señalizados de la cresta rocosa al atardecer."
+    tip: "Lleva zapatillas con buen agarre para recorrer los senderos señalizados de la cresta rocosa al atardecer.",
+    website: "",
+    phone: "",
+    price: "Rutas de senderismo y miradores naturales: 100% gratuito",
+    openingHours: "Abierto 24 horas todo el año (recomendado con luz diurna)",
+    metroOrTransit: "Autobús 8E desde Ferenciek tere hasta Farkasréti temető",
+    priceCategory: "free"
   },
   {
     title: "Castillo de Vajdahunyad",
@@ -382,7 +568,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Vajdahunyad stny., 1146 Budapest (Városliget)",
     googleMapsQuery: "Vajdahunyad Castle Budapest",
-    tip: "Visita la estatua de bronce de 'Anonymus' en el patio: la leyenda dice que tocar su pluma de escribir concede inspiración y buena fortuna."
+    tip: "Visita la estatua de bronce de 'Anonymus' en el patio: la leyenda dice que tocar su pluma de escribir concede inspiración y buena fortuna.",
+    website: "https://www.mezogazdasagimuzeum.hu",
+    phone: "+36 1 422 0765",
+    price: "Acceso a los patios exteriores y jardines: GRATIS. Museo de la Agricultura interior: 3.000 HUF (~7,5 €) / Estudiantes: 1.500 HUF",
+    openingHours: "Patios y parque abiertos 24 horas | Museo interior: Mar a Dom: 10:00 - 17:00 (Lunes cerrado)",
+    metroOrTransit: "Metro M1 Hősök tere o Széchenyi fürdő",
+    priceCategory: "free"
   },
   {
     title: "Teatro de Opereta de Budapest",
@@ -394,7 +586,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Nagymező u. 17, 1065 Budapest",
     googleMapsQuery: "Budapest Operetta Theatre Nagymező u",
-    tip: "La calle Nagymező utca cuenta con numerosos cafés y terrazas bohemias ideales para tomar algo antes o después del teatro."
+    tip: "La calle Nagymező utca cuenta con numerosos cafés y terrazas bohemias ideales para tomar algo antes o después del teatro.",
+    website: "https://operett.hu",
+    phone: "+36 1 353 2177",
+    price: "Entradas para espectáculos: desde 3.500 hasta 18.000 HUF (~9-45 € según butaca)",
+    openingHours: "Taquilla: 10:00 - 19:00. Funciones por la tarde/noche",
+    metroOrTransit: "Metro M1 Ópera o Tranvía 4/6 Oktogon",
+    priceCategory: "museum"
   },
   {
     title: "Ópera Nacional de Hungría",
@@ -406,7 +604,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 60,
     locationName: "Andrássy út 22, 1061 Budapest",
     googleMapsQuery: "Hungarian State Opera Budapest Andrássy út",
-    tip: "Se ofrecen tours guiados en español por la tarde que suelen incluir un mini concierto en directo en la gran escalera de mármol."
+    tip: "Se ofrecen tours guiados en español por la tarde que suelen incluir un mini concierto en directo en la gran escalera de mármol.",
+    website: "https://www.opera.hu",
+    phone: "+36 1 814 7100",
+    price: "Visita guiada oficial (tour con mini concierto): ~4.500 - 7.000 HUF (~11-18 €) | Entradas ópera/ballet: 3.000 - 28.000 HUF",
+    openingHours: "Tours guiados diarios en español habitualmente a las 14:30 y 16:00",
+    metroOrTransit: "Metro M1 estación Opera",
+    priceCategory: "museum"
   },
   {
     title: "Zapatos en la Orilla del Danubio",
@@ -418,7 +622,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 25,
     locationName: "Id. Antall József rkp., a 300m del Parlamento",
     googleMapsQuery: "Shoes on the Danube Bank Budapest",
-    tip: "Lugar de máximo respeto y silencio. La luz del atardecer reflejándose en el Danubio le confiere un impacto visual y emotivo extraordinario."
+    tip: "Lugar de máximo respeto y silencio. La luz del atardecer reflejándose en el Danubio le confiere un impacto visual y emotivo extraordinario.",
+    website: "",
+    phone: "",
+    price: "Monumento conmemorativo al aire libre: 100% gratuito",
+    openingHours: "Abierto 24 horas",
+    metroOrTransit: "Tranvía 2 (parada Kossuth Lajos tér) o Metro M2",
+    priceCategory: "free"
   },
   {
     title: "Monumento del Milenio (Plaza de los Héroes)",
@@ -430,7 +640,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 45,
     locationName: "Hősök tere, 1146 Budapest",
     googleMapsQuery: "Heroes' Square Budapest",
-    tip: "Llega tomando la línea de metro M1 (Földalatti), la primera línea subterránea de Europa continental, declarada Patrimonio de la Humanidad."
+    tip: "Llega tomando la línea de metro M1 (Földalatti), la primera línea subterránea de Europa continental, declarada Patrimonio de la Humanidad.",
+    website: "",
+    phone: "",
+    price: "Plaza pública y monumento: 100% gratuito",
+    openingHours: "Abierto 24 horas todo el año",
+    metroOrTransit: "Metro M1 estación Hősök tere",
+    priceCategory: "free"
   },
   {
     title: "Parlamento de Budapest",
@@ -442,7 +658,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Kossuth Lajos tér 1-3, 1055 Budapest",
     googleMapsQuery: "Hungarian Parliament Building Budapest",
-    tip: "Reserva tu entrada y visita guiada en español con antelación en el portal oficial jegymester.hu para evitar quedarte sin plaza."
+    tip: "Reserva tu entrada y visita guiada en español con antelación en el portal oficial jegymester.hu para evitar quedarte sin plaza.",
+    website: "https://parlament.hu",
+    phone: "+36 1 441 4000",
+    price: "Visita guiada: Ciudadanos UE adultos: ~6.000 HUF (~15 €) / Estudiantes UE: ~3.000 HUF (~7,5 €) | No UE: ~12.000 HUF (~30 €)",
+    openingHours: "Lunes a Domingo: 08:00 - 18:00 (Visitas guiadas en horario concertado)",
+    metroOrTransit: "Metro M2 y Tranvía 2 parada Kossuth Lajos tér",
+    priceCategory: "museum"
   },
   {
     title: "Casa de las Mariposas",
@@ -454,7 +676,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 40,
     locationName: "Állatkerti krt. 6-12, 1146 Budapest (Városliget)",
     googleMapsQuery: "Butterfly House Budapest Zoo",
-    tip: "Viste prendas amarillas o de colores vivos para que las mariposas se posen en tus brazos o hombros para sacar fotos cercanas."
+    tip: "Viste prendas amarillas o de colores vivos para que las mariposas se posen en tus brazos o hombros para sacar fotos cercanas.",
+    website: "https://zoobudapest.com",
+    phone: "+36 1 273 4900",
+    price: "Acceso incluido con la entrada general del Zoo de Budapest (~5.000 HUF / ~12,5 €)",
+    openingHours: "Temporada de primavera y verano: 10:00 - 17:30",
+    metroOrTransit: "Metro M1 Széchenyi fürdő",
+    priceCategory: "museum"
   },
   {
     title: "Tropicarium-Oceanarium Kft.",
@@ -466,7 +694,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 90,
     locationName: "Nagytétényi út 37-43, 1222 Budapest (C.C. Campona)",
     googleMapsQuery: "Tropicarium Oceanarium Budapest Nagytétényi út",
-    tip: "Los jueves a las 15:00 horas se puede presenciar la alimentación directa de los tiburones por submarinistas dentro del tanque principal."
+    tip: "Los jueves a las 15:00 horas se puede presenciar la alimentación directa de los tiburones por submarinistas dentro del tanque principal.",
+    website: "https://tropicarium.hu",
+    phone: "+36 1 424 3053",
+    price: "Adultos: 5.200 HUF (~13 €) | Niños y estudiantes: 4.000 HUF (~10 €)",
+    openingHours: "Todos los días: 10:00 - 20:00 (Última entrada a las 19:00)",
+    metroOrTransit: "Autobús 33 o 133E desde Móricz Zsigmond körtér hasta Campona",
+    priceCategory: "museum"
   },
   {
     title: "Zoológico y Jardín Botánico de Budapest",
@@ -478,7 +712,13 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 120,
     locationName: "Állatkerti krt. 6-12, 1146 Budapest",
     googleMapsQuery: "Budapest Zoo and Botanical Garden Városliget",
-    tip: "No te pierdas la Casa del Elefante de estilo oriental ni la Puerta Principal con sus esculturas de osos y elefantes tallados en piedra."
+    tip: "No te pierdas la Casa del Elefante de estilo oriental ni la Puerta Principal con sus esculturas de osos y elefantes tallados en piedra.",
+    website: "https://zoobudapest.com",
+    phone: "+36 1 273 4900",
+    price: "Adultos: 5.000 HUF (~12,5 €) | Estudiantes y niños: 3.600 HUF (~9 €) | Familiar: ~15.000 HUF",
+    openingHours: "Todos los días: 09:00 - 18:00 (en verano hasta las 19:00)",
+    metroOrTransit: "Metro M1 Széchenyi fürdő o Hősök tere",
+    priceCategory: "museum"
   },
   {
     title: "Mirage Medic Hotel",
@@ -490,6 +730,12 @@ export const BUDAPEST_SEED_PLACES: SeedPlace[] = [
     estimatedTimeMinutes: 20,
     locationName: "Dózsa György út 88, 1068 Budapest",
     googleMapsQuery: "Mirage Medic Hotel Budapest Dózsa György út",
-    tip: "Ubicación inmejorable en la avenida Dózsa György para hacer una parada o alojarse cerca de las principales atracciones culturales."
+    tip: "Ubicación inmejorable en la avenida Dózsa György para hacer una parada o alojarse cerca de las principales atracciones culturales.",
+    website: "https://miragemedichotel.hu",
+    phone: "+36 1 462 7070",
+    price: "Alojamiento: ~25.000 - 45.000 HUF/noche (~65-115 €). Cafetería y desayunos abiertos al público.",
+    openingHours: "Recepción abierta 24 horas",
+    metroOrTransit: "Metro M1 Hősök tere (a 100 metros)",
+    priceCategory: "hotel"
   }
 ];
