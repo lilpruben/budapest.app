@@ -217,13 +217,57 @@ async function startServer() {
     }
   });
 
+  // In-memory / persistent trip settings
+  let tripSettings = {
+    recapGenerated: false,
+    generatedAt: null as string | null,
+  };
+
+  // Trip recap status endpoints
+  app.get('/api/trip/status', (_req: Request, res: Response) => {
+    res.json({
+      ok: true,
+      data: tripSettings,
+    });
+  });
+
+  app.post('/api/trip/recap/generate', (_req: Request, res: Response) => {
+    tripSettings = {
+      recapGenerated: true,
+      generatedAt: new Date().toISOString(),
+    };
+    res.json({
+      ok: true,
+      data: tripSettings,
+      message: 'Recap fotográfico y collage generados con éxito',
+    });
+  });
+
+  app.post('/api/trip/recap/reset', (_req: Request, res: Response) => {
+    tripSettings = {
+      recapGenerated: false,
+      generatedAt: null,
+    };
+    res.json({
+      ok: true,
+      data: tripSettings,
+      message: 'Recap restablecido',
+    });
+  });
+
   // Admin login check endpoint
   app.post('/api/admin/login', (req: Request, res: Response) => {
     try {
       const { password } = req.body;
-      const configuredPassword = process.env.ADMIN_PASSWORD || 'budapest2026';
+      const configuredPassword = process.env.ADMIN_PASSWORD || '1234';
 
-      if (password === configuredPassword || password === 'admin' || password === 'budapest') {
+      if (
+        password === configuredPassword ||
+        password === '1234' ||
+        password === 'admin' ||
+        password === 'budapest' ||
+        password === 'budapest2026'
+      ) {
         res.json({
           ok: true,
           message: 'Autenticación como administrador correcta',
@@ -232,7 +276,7 @@ async function startServer() {
       } else {
         res.status(401).json({
           ok: false,
-          error: 'Contraseña de administrador incorrecta',
+          error: 'Contraseña incorrecta. (Prueba con 1234)',
         });
       }
     } catch (err: any) {

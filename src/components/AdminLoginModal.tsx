@@ -10,6 +10,8 @@ import {
   AlertCircle,
   KeyRound,
   CheckCircle2,
+  Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import { DbStatus } from '../types';
 
@@ -17,33 +19,46 @@ interface AdminLoginModalProps {
   isOpen: boolean;
   isAdmin: boolean;
   dbStatus: DbStatus | null;
+  isRecapGenerated: boolean;
+  photosCount: number;
+  visitedCount: number;
+  totalCount: number;
   onClose: () => void;
   onLogin: (password: string) => Promise<boolean>;
   onLogout: () => void;
   onOpenServerModal: () => void;
   onOpenTripRecap: () => void;
+  onGenerateRecap: () => Promise<void>;
+  onResetRecap: () => Promise<void>;
 }
 
 export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   isOpen,
   isAdmin,
   dbStatus,
+  isRecapGenerated,
+  photosCount,
+  visitedCount,
+  totalCount,
   onClose,
   onLogin,
   onLogout,
   onOpenServerModal,
   onOpenTripRecap,
+  onGenerateRecap,
+  onResetRecap,
 }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessingRecap, setIsProcessingRecap] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) {
-      setError('Por favor ingresa la contraseña de administrador');
+      setError('Por favor ingresa la contraseña de administrador (ej. 1234)');
       return;
     }
 
@@ -53,7 +68,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     try {
       const success = await onLogin(password.trim());
       if (!success) {
-        setError('Contraseña incorrecta. (Prueba: budapest2026)');
+        setError('Contraseña incorrecta. Prueba con: 1234');
       } else {
         setPassword('');
       }
@@ -64,11 +79,26 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     }
   };
 
+  const handleToggleRecap = async (generate: boolean) => {
+    setIsProcessingRecap(true);
+    try {
+      if (generate) {
+        await onGenerateRecap();
+      } else {
+        await onResetRecap();
+      }
+    } catch (err) {
+      console.error('Error toggling recap:', err);
+    } finally {
+      setIsProcessingRecap(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
       <div
         id="admin-login-modal"
-        className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col"
+        className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col my-auto"
       >
         {/* Modal Header */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/70 dark:bg-slate-800/40">
@@ -87,7 +117,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 {isAdmin ? 'Panel de Administrador' : 'Acceso de Administrador'}
               </h2>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {isAdmin ? 'Modo desarrollador habilitado' : 'Herramientas avanzadas protegidas'}
+                {isAdmin ? 'Gestión de viaje, collage y base de datos' : 'Introduce la contraseña (1234)'}
               </p>
             </div>
           </div>
@@ -110,76 +140,124 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>
-                  Has iniciado sesión como <strong>Administrador</strong>. Tienes acceso completo a
-                  la base de datos, servidor y recap del viaje.
+                  Sesión activa como <strong>Administrador</strong>. Aquí controlas cuándo generar el
+                  recap fotográfico para los usuarios y la base de datos.
                 </span>
               </div>
 
-              {/* Developer Actions */}
-              <div className="space-y-2">
-                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Acciones de Desarrollador
+              {/* SECTION 1: TRIP FINISH & RECAP COLLAGE GENERATOR */}
+              <div className="p-4 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center">
+                      <Camera className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        Recap & Collage de Fotos del Viaje
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {photosCount} fotos guardadas • {visitedCount}/{totalCount} sitios visitados
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                      isRecapGenerated
+                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {isRecapGenerated ? 'PUBLICADO' : 'EN CURSO'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {isRecapGenerated
+                    ? '🎉 El recap ya está generado y publicado. Los usuarios ahora pueden ver el collage interactivo con todas las fotos y recuerdos.'
+                    : 'Hasta que no generes el recap, los usuarios no pueden ver el collage final ni el resumen del viaje. Pulsa el botón abajo cuando el viaje finalice:'}
                 </p>
 
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    id="admin-open-server-btn"
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenServerModal();
-                    }}
-                    className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-all group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                        <Database className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                          Servidor & Base de Datos
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                          {dbStatus?.connected ? 'MongoDB Atlas Conectado' : 'Almacenamiento Local'} •{' '}
-                          {dbStatus?.count ?? 0} lugares
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                      Abrir
-                    </span>
-                  </button>
+                <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                  {!isRecapGenerated ? (
+                    <button
+                      id="admin-generate-recap-btn"
+                      type="button"
+                      disabled={isProcessingRecap}
+                      onClick={() => handleToggleRecap(true)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-sm active:scale-95 transition-all"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>{isProcessingRecap ? 'Generando...' : '✨ Generar Recap & Desbloquear Collage'}</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        id="admin-view-recap-btn"
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenTripRecap();
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all shadow-xs"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>Ver Collage Activo</span>
+                      </button>
 
-                  <button
-                    id="admin-open-recap-btn"
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenTripRecap();
-                    }}
-                    className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-all group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                        <Camera className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                          Álbum & Recap del Viaje
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          Resumen fotográfico, estadísticas finales y recuerdos
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 font-mono">
-                      Ver Álbum
-                    </span>
-                  </button>
+                      <button
+                        id="admin-reset-recap-btn"
+                        type="button"
+                        disabled={isProcessingRecap}
+                        onClick={() => handleToggleRecap(false)}
+                        className="flex items-center justify-center gap-1 py-2 px-3 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                        title="Ocultar a los usuarios y volver a estado 'viaje en curso'"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Restablecer</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Logout button */}
+              {/* SECTION 2: DATABASE & SERVER CONTROLS */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  Base de Datos & Servidor (Admin)
+                </p>
+
+                <button
+                  id="admin-open-server-btn"
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenServerModal();
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        Base de Datos MongoDB & Servidor
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                        {dbStatus?.connected ? 'MongoDB Atlas Conectado' : 'Almacenamiento Local'} •{' '}
+                        {dbStatus?.count ?? 0} lugares
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                    Gestionar
+                  </span>
+                </button>
+              </div>
+
+              {/* SECTION 3: LOGOUT */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   id="admin-logout-btn"
@@ -200,28 +278,36 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
                 <Layers className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                <p>
-                  El acceso para usuarios finales está simplificado sin detalles técnicos de
-                  servidor. Introduce la clave de desarrollador para gestionar la base de datos y
-                  el álbum final.
-                </p>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                    Zona restringida para el administrador
+                  </p>
+                  <p className="mt-0.5 text-slate-500 dark:text-slate-400">
+                    Introduce la contraseña para acceder a la base de datos y generar el collage de fotos final cuando termine el viaje.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label
-                  htmlFor="admin-password-input"
-                  className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
-                >
-                  <KeyRound className="w-3.5 h-3.5 text-slate-400" />
-                  Contraseña de Administrador:
-                </label>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="admin-password-input"
+                    className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-slate-400" />
+                    Contraseña:
+                  </label>
+                  <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                    Clave: 1234
+                  </span>
+                </div>
                 <input
                   id="admin-password-input"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Introduce la contraseña (ej. budapest2026)"
-                  className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-slate-900 dark:focus:border-slate-400"
+                  placeholder="Introduce la contraseña (ej. 1234)"
+                  className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-slate-900 dark:focus:border-slate-400 font-mono"
                   autoFocus
                 />
               </div>
@@ -241,7 +327,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                   className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white shadow-xs disabled:opacity-50 transition-all"
                 >
                   <Lock className="w-3.5 h-3.5" />
-                  <span>{isLoading ? 'Verificando...' : 'Iniciar Sesión como Admin'}</span>
+                  <span>{isLoading ? 'Verificando...' : 'Acceder al Panel'}</span>
                 </button>
               </div>
             </form>

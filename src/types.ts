@@ -43,3 +43,8 @@ export interface DbStatus {
   count: number;
   uriConfigured: boolean;
 }
+
+export interface TripStatus {
+  recapGenerated: boolean;
+  generatedAt?: string | null;
+}

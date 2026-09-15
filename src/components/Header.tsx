@@ -8,7 +8,7 @@ import {
   ChevronUp,
   ShieldCheck,
   Camera,
-  Compass,
+  Lock,
   Sparkles,
 } from 'lucide-react';
 import { DbStatus } from '../types';
@@ -17,6 +17,7 @@ interface HeaderProps {
   dbStatus: DbStatus | null;
   totalCount: number;
   visitedCount: number;
+  photosCount: number;
   isDark: boolean;
   onToggleDark: () => void;
   onOpenAddModal: () => void;
@@ -26,12 +27,14 @@ interface HeaderProps {
   isAdmin: boolean;
   onOpenAdminModal: () => void;
   onOpenTripRecap: () => void;
+  isRecapGenerated: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   dbStatus,
   totalCount,
   visitedCount,
+  photosCount,
   isDark,
   onToggleDark,
   onOpenAddModal,
@@ -41,131 +44,169 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   onOpenAdminModal,
   onOpenTripRecap,
+  isRecapGenerated,
 }) => {
   const percentage = totalCount > 0 ? Math.round((visitedCount / totalCount) * 100) : 0;
 
   // Compact Header view
   if (isCollapsed) {
     return (
-      <header className="px-4 sm:px-6 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shrink-0 transition-colors flex items-center justify-between shadow-2xs">
+      <header className="px-3 sm:px-5 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shrink-0 transition-colors flex items-center justify-between shadow-2xs">
         {/* Left: Brand + progress pill + Expand trigger */}
         <button
           id="expand-header-btn"
           type="button"
           onClick={onToggleCollapse}
-          className="flex items-center gap-2 group text-left"
+          className="flex items-center gap-2 group text-left min-w-0"
           title="Expandir cabecera"
         >
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <span className="text-base font-display font-black text-slate-900 dark:text-white tracking-tight">
               Budapest
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-transform" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-transform shrink-0" />
           </div>
-          <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
+          <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800 shrink-0">
             {visitedCount}/{totalCount} ({percentage}%)
           </span>
         </button>
 
-        {/* Right action controls */}
-        <div className="flex items-center gap-1.5">
-          <button
-            id="recap-compact-btn"
-            type="button"
-            onClick={onOpenTripRecap}
-            title="Ver Álbum de Fotos"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60 hover:bg-amber-500/25 transition-all active:scale-95"
-          >
-            <Camera className="w-3 h-3 text-amber-500" />
-            <span className="hidden xs:inline">Álbum</span>
-          </button>
-
-          {isAdmin && (
-            <>
-              <button
-                id="admin-compact-btn"
-                type="button"
-                onClick={onOpenAdminModal}
-                title="Panel de Administrador"
-                className="w-7 h-7 rounded-full flex items-center justify-center transition-all bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                id="server-compact-btn"
-                type="button"
-                onClick={onOpenServerModal}
-                title="Ajustes de Servidor & Base de datos"
-                className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-900 text-emerald-400 border border-slate-700 hover:bg-slate-800 transition-all"
-              >
-                <Database className="w-3 h-3" />
-              </button>
-            </>
+        {/* Right action controls with consistent sizes */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Collage & Recap button: Only shown to user if admin generated it, or always to admin */}
+          {(isRecapGenerated || isAdmin) && (
+            <button
+              id="recap-compact-btn"
+              type="button"
+              onClick={onOpenTripRecap}
+              title={isRecapGenerated ? 'Ver Collage y Álbum del Viaje' : 'Vista previa de Recap (Admin)'}
+              className={`h-8 px-2.5 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shrink-0 ${
+                isRecapGenerated
+                  ? 'bg-amber-500 text-slate-950 shadow-xs hover:bg-amber-400 animate-pulse'
+                  : 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60'
+              }`}
+            >
+              <Camera className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden xs:inline">Collage</span>
+            </button>
           )}
 
+          {/* Admin button: Opens password login or Admin panel */}
+          <button
+            id="admin-compact-btn"
+            type="button"
+            onClick={onOpenAdminModal}
+            title={isAdmin ? 'Panel de Administrador (Activo)' : 'Acceso de Administrador (Clave 1234)'}
+            className={`h-8 w-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+              isAdmin
+                ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            {isAdmin ? <ShieldCheck className="w-4 h-4" /> : <Lock className="w-3.5 h-3.5" />}
+          </button>
+
+          {/* Database button (Admin only) */}
+          {isAdmin && (
+            <button
+              id="server-compact-btn"
+              type="button"
+              onClick={onOpenServerModal}
+              title="Ajustes de Servidor & Base de datos"
+              className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-900 text-emerald-400 border border-slate-700 hover:bg-slate-800 transition-all shrink-0"
+            >
+              <Database className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Dark mode button */}
           <button
             id="toggle-dark-mode-btn"
             type="button"
             onClick={onToggleDark}
             aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+            className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shrink-0"
           >
             {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
 
+          {/* New spot button */}
           <button
             id="open-add-place-btn"
             type="button"
             onClick={onOpenAddModal}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white shadow-2xs transition-all active:scale-95"
+            className="h-8 px-2.5 rounded-full text-[11px] font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white shadow-2xs transition-all active:scale-95 flex items-center gap-1 shrink-0"
           >
-            <Plus className="w-3 h-3" />
-            <span>NUEVO</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline">Nuevo</span>
           </button>
         </div>
       </header>
     );
   }
 
-  // Expanded Luxury Editorial Header
+  // Expanded Header
   return (
-    <header className="pt-4 px-4 sm:px-6 pb-3.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shrink-0 transition-colors shadow-2xs">
-      {/* Top action row */}
-      <div className="flex justify-between items-center mb-3">
-        {/* Left Side: Brand badge & Album button */}
-        <div className="flex items-center gap-2">
-          {/* Álbum & Recap Button */}
-          <button
-            id="open-trip-recap-btn"
-            type="button"
-            onClick={onOpenTripRecap}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all active:scale-95 shadow-2xs group"
-            title="Ver Álbum de Fotos & Recuerdos del Viaje"
-          >
-            <Camera className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:rotate-6 transition-transform" />
-            <span className="tracking-wide">ÁLBUM & RECAP</span>
-          </button>
+    <header className="pt-3 sm:pt-4 px-3.5 sm:px-6 pb-3 sm:pb-3.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shrink-0 transition-colors shadow-2xs">
+      {/* Top action bar: standard height controls without awkward wraps */}
+      <div className="flex justify-between items-center mb-2.5 gap-2">
+        {/* Left Side: Brand badge or Collage status if unlocked */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          {/* If recap is generated, show prominent Collage button */}
+          {isRecapGenerated ? (
+            <button
+              id="open-trip-recap-btn"
+              type="button"
+              onClick={onOpenTripRecap}
+              className="h-8 px-2.5 sm:px-3 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-xs transition-all active:scale-95 flex items-center gap-1.5 shrink-0 animate-bounce-subtle"
+              title="¡El viaje ha finalizado! Toca para ver el Collage de Fotos"
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span className="tracking-tight whitespace-nowrap">Álbum Collage</span>
+              {photosCount > 0 && (
+                <span className="bg-slate-950 text-amber-400 text-[10px] font-mono px-1.5 py-0.2 rounded-full">
+                  {photosCount}
+                </span>
+              )}
+            </button>
+          ) : isAdmin ? (
+            /* Admin can see preview badge */
+            <button
+              id="admin-preview-recap-btn"
+              type="button"
+              onClick={onOpenTripRecap}
+              className="h-8 px-2 sm:px-2.5 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 hover:bg-amber-100 transition-all flex items-center gap-1 shrink-0"
+              title="Previsualizar Álbum (Solo Admin)"
+            >
+              <Camera className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="hidden sm:inline">Recap (Admin)</span>
+            </button>
+          ) : (
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="truncate">Viaje en curso</span>
+            </div>
+          )}
 
-          {/* Admin Controls (Only if logged in) */}
+          {/* Admin mode active badge */}
           {isAdmin && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 id="open-admin-panel-btn"
                 type="button"
                 onClick={onOpenAdminModal}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200 transition-all"
-                title="Administrador activo: Haz clic para ver opciones"
+                className="h-8 px-2 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200 transition-all flex items-center gap-1"
+                title="Panel de Administrador"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="font-mono text-[10px] tracking-wide">ADMIN</span>
+                <span className="font-mono text-[10px]">ADMIN</span>
               </button>
 
               <button
                 id="open-db-status-btn"
                 type="button"
                 onClick={onOpenServerModal}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                className={`h-8 px-2 rounded-full text-[11px] font-medium border transition-all flex items-center gap-1 ${
                   dbStatus?.connected
                     ? 'bg-slate-900 text-emerald-400 border-slate-700 hover:bg-slate-800'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
@@ -177,17 +218,41 @@ export const Header: React.FC<HeaderProps> = ({
                     dbStatus?.connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
                   }`}
                 />
-                <span className="font-mono text-[10px] font-bold">
-                  {dbStatus?.connected ? 'MONGO' : 'LOCAL'}
-                </span>
                 <Database className="w-3 h-3 opacity-80" />
               </button>
             </div>
           )}
         </div>
 
-        {/* Right side controls: Collapse toggle + Dark Mode + New Spot button */}
-        <div className="flex items-center gap-1.5">
+        {/* Right side controls: uniform 32-34px buttons for high precision on mobile */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Admin Login button (if not logged in) */}
+          {!isAdmin && (
+            <button
+              id="header-admin-login-btn"
+              type="button"
+              onClick={onOpenAdminModal}
+              aria-label="Acceso de Administrador"
+              title="Acceso de Administrador (Clave 1234)"
+              className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-2xs shrink-0"
+            >
+              <Lock className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Dark Mode toggle */}
+          <button
+            id="toggle-dark-mode-btn"
+            type="button"
+            onClick={onToggleDark}
+            aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            title={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
+            className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-2xs shrink-0"
+          >
+            {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+
+          {/* Collapse toggle */}
           {onToggleCollapse && (
             <button
               id="collapse-header-btn"
@@ -195,47 +260,37 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onToggleCollapse}
               aria-label="Colapsar cabecera"
               title="Colapsar cabecera para ganar espacio"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-2xs"
+              className="h-8 w-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-2xs shrink-0"
             >
-              <ChevronUp className="w-4 h-4" />
+              <ChevronUp className="w-3.5 h-3.5" />
             </button>
           )}
 
-          <button
-            id="toggle-dark-mode-btn"
-            type="button"
-            onClick={onToggleDark}
-            aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            title={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-2xs"
-          >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-
+          {/* New Spot button */}
           <button
             id="open-add-place-btn"
             type="button"
             onClick={onOpenAddModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white shadow-xs active:scale-95 transition-all"
+            className="h-8 px-2.5 sm:px-3 rounded-full text-xs font-bold bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white shadow-xs active:scale-95 transition-all flex items-center gap-1 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>NUEVO</span>
+            <span className="hidden xs:inline">Nuevo</span>
           </button>
         </div>
       </div>
 
       {/* Main Title & Progress Stats */}
-      <div className="flex items-end justify-between mb-2.5">
-        <div>
+      <div className="flex items-end justify-between mb-2">
+        <div className="min-w-0 pr-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
+            <h1 className="text-xl sm:text-2xl font-display font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
               Budapest
             </h1>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80">
-              Guía & Checkpoint
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 shrink-0">
+              Checklist
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">
             Monumentos, termas y rincones imprescindibles
           </p>
         </div>
@@ -243,20 +298,20 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Visited Progress Indicator */}
         <div className="text-right shrink-0">
           <div className="flex items-baseline gap-1 justify-end">
-            <span className="text-2xl font-display font-extrabold text-emerald-600 dark:text-emerald-400 leading-none">
+            <span className="text-xl sm:text-2xl font-display font-extrabold text-emerald-600 dark:text-emerald-400 leading-none">
               {visitedCount}
             </span>
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-500">
               / {totalCount}
             </span>
           </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+          <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
             {percentage}% visitados
           </span>
         </div>
       </div>
 
-      {/* Refined Smooth Gradient Progress Bar */}
+      {/* Progress Bar */}
       <div className="relative h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
         <div
           className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 transition-all duration-500 rounded-full shadow-xs"
