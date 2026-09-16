@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Place } from '../types';
 import { compressImage } from '../utils/imageCompressor';
+import { getLandmarkPhoto } from '../data/landmarkImages';
 
 interface PlaceItemProps {
   place: Place;
@@ -124,20 +125,24 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
     onToggleVisited(place._id, place.visited);
   };
 
+  const landmarkPhoto = getLandmarkPhoto(place.title, place.originalName, place.category);
+  const personalPhoto = photoCount > 0 && place.photos?.[0] ? place.photos[0] : null;
+  const displayPhoto = personalPhoto || landmarkPhoto;
+
   return (
     <article
       id={`place-card-${place._id}`}
-      className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 group hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
+      className="border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 group hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
     >
       {/* High Density Row */}
-      <div className="flex items-center gap-3 px-4 sm:px-6 py-3.5">
+      <div className="flex items-center gap-2.5 sm:gap-3 px-3 sm:px-6 py-3">
         {/* Toggle Checkbox matching High Density Theme */}
         <button
           id={`toggle-place-${place._id}`}
           type="button"
           onClick={handleToggleClick}
           aria-label={`Marcar ${place.title} como ${place.visited ? 'no visitado' : 'visitado'}`}
-          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all active:scale-95 ${
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all active:scale-95 ${
             place.visited
               ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
               : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
@@ -152,27 +157,32 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
           )}
         </button>
 
-        {/* Thumbnail preview if has photo */}
-        {photoCount > 0 && place.photos?.[0] && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setPreviewPhoto(place.photos![0]);
-            }}
-            className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs group/thumb hover:scale-105 transition-transform"
-            title="Ver foto del recuerdo a pantalla completa"
-          >
-            <img
-              src={place.photos[0]}
-              alt={place.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white transition-opacity">
+        {/* Place Photo Thumbnail - Visible for every place */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setPreviewPhoto(displayPhoto);
+          }}
+          className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs group/thumb hover:scale-105 active:scale-95 transition-all bg-slate-100 dark:bg-slate-800 cursor-pointer"
+          title={`Ver fotografía de ${place.title}`}
+        >
+          <img
+            src={displayPhoto}
+            alt={place.title}
+            className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300"
+            loading="lazy"
+          />
+          {personalPhoto ? (
+            <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs border border-white dark:border-slate-900">
+              <Camera className="w-2.5 h-2.5" />
+            </div>
+          ) : (
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white transition-opacity">
               <Maximize2 className="w-3.5 h-3.5" />
             </div>
-          </button>
-        )}
+          )}
+        </button>
 
         {/* Title, Subtitle, and District */}
         <div
@@ -264,7 +274,42 @@ export const PlaceItem: React.FC<PlaceItemProps> = ({
 
       {/* Expandable Details Tray */}
       {isExpanded && (
-        <div className="px-4 sm:px-6 pb-4 pt-1 bg-slate-50/60 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 space-y-3.5 animate-in fade-in duration-150">
+        <div className="px-3.5 sm:px-6 pb-4 pt-2 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 space-y-3.5 animate-in fade-in duration-150">
+          {/* Panoramic Landmark Photo Showcase Banner */}
+          <div className="relative w-full h-40 sm:h-52 rounded-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700/80 shadow-xs group/banner">
+            <img
+              src={displayPhoto}
+              alt={place.title}
+              className="w-full h-full object-cover group-hover/banner:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent flex flex-col justify-between p-3 sm:p-4">
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-amber-300 uppercase border border-white/10 tracking-wider">
+                  {place.category}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewPhoto(displayPhoto)}
+                  className="px-2 py-1 rounded-lg bg-black/60 hover:bg-black/80 text-white backdrop-blur-xs transition-colors flex items-center gap-1 text-[11px] font-mono shadow-xs"
+                  title="Ver fotografía en grande"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>Ampliar</span>
+                </button>
+              </div>
+              <div>
+                <h4 className="text-white font-black text-base sm:text-lg leading-tight drop-shadow-sm font-display">
+                  {place.title}
+                </h4>
+                {place.originalName && (
+                  <p className="text-slate-300 text-xs italic drop-shadow-sm">
+                    {place.originalName}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Hungarian Name on mobile if present */}
           {place.originalName && (
             <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">

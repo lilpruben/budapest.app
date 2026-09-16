@@ -22,6 +22,7 @@ import {
   Ticket,
 } from 'lucide-react';
 import { Place, PlaceCategory } from '../types';
+import { getLandmarkPhoto } from '../data/landmarkImages';
 
 const CATEGORY_NAMES: Record<PlaceCategory, string> = {
   buda: 'Buda (Castillo & Colinas)',
@@ -226,6 +227,27 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
 
         {/* Scrollable Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-sm flex-1">
+          {/* Landmark Photo Showcase Banner */}
+          <div className="relative w-full h-44 sm:h-56 rounded-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 shadow-md">
+            <img
+              src={place.photos?.[0] || getLandmarkPhoto(place.title, place.originalName, place.category)}
+              alt={place.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex items-end justify-between p-3.5 sm:p-4">
+              <div className="text-white text-xs font-mono font-medium drop-shadow-sm flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="truncate max-w-[200px] sm:max-w-md">{place.locationName || 'Budapest, Hungría'}</span>
+              </div>
+              {place.photos && place.photos.length > 0 && (
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold flex items-center gap-1 shrink-0">
+                  <Camera className="w-3 h-3" />
+                  <span>{place.photos.length} recuerdo{place.photos.length > 1 ? 's' : ''}</span>
+                </span>
+              )}
+            </div>
+          </div>
+
           {/* Action Highlights Bar (Phone, Web, Route, Visited) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {/* Website Button */}

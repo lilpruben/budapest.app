@@ -17,6 +17,7 @@ import {
   Info,
 } from 'lucide-react';
 import { Place, PlaceCategory } from '../types';
+import { getLandmarkPhoto } from '../data/landmarkImages';
 
 interface MapViewProps {
   places: Place[];
@@ -201,18 +202,26 @@ export const MapView: React.FC<MapViewProps> = ({
                       setSelectedId(place._id);
                       setViewMode('place');
                     }}
-                    className={`w-full text-left p-2.5 transition-all flex items-start gap-2.5 ${
+                    className={`w-full text-left p-2.5 transition-all flex items-center gap-2.5 ${
                       isSelected
                         ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-l-3 border-emerald-500'
                         : 'hover:bg-slate-50 dark:hover:bg-slate-800/40 border-l-3 border-transparent'
                     }`}
                   >
-                    <div
-                      className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                        place.visited ? 'bg-emerald-500' : 'bg-amber-400'
-                      }`}
-                      title={place.visited ? 'Visitado' : 'Pendiente'}
-                    />
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100">
+                      <img
+                        src={place.photos?.[0] || getLandmarkPhoto(place.title, place.originalName, place.category)}
+                        alt={place.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div
+                        className={`absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full border border-white dark:border-slate-900 ${
+                          place.visited ? 'bg-emerald-500' : 'bg-amber-400'
+                        }`}
+                        title={place.visited ? 'Visitado' : 'Pendiente'}
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
                         <span
@@ -233,7 +242,7 @@ export const MapView: React.FC<MapViewProps> = ({
                       <p className="text-[10px] text-slate-400 truncate">
                         {place.originalName || place.locationName}
                       </p>
-                      <div className="flex items-center gap-1.5 mt-1">
+                      <div className="flex items-center gap-1.5 mt-0.5">
                         <span
                           className={`text-[9px] px-1.5 py-0.2 rounded-full font-medium ${catCol.bg} ${catCol.text}`}
                         >
@@ -302,6 +311,29 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* Selected Place Detail Card */}
           {selectedPlace && (
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs space-y-3">
+              {/* Landmark Photo Showcase Banner */}
+              <div className="relative w-full h-36 sm:h-44 rounded-xl overflow-hidden border border-slate-200/90 dark:border-slate-800 shadow-2xs">
+                <img
+                  src={selectedPlace.photos?.[0] || getLandmarkPhoto(selectedPlace.title, selectedPlace.originalName, selectedPlace.category)}
+                  alt={selectedPlace.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-between p-3">
+                  <span className="text-white text-xs font-mono font-bold drop-shadow-sm truncate">
+                    {selectedPlace.locationName}
+                  </span>
+                  {onOpenDetails && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenDetails(selectedPlace)}
+                      className="px-2.5 py-1 rounded-lg bg-white/90 hover:bg-white text-slate-900 text-[11px] font-bold shadow-xs transition-colors"
+                    >
+                      Ver Ficha
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="space-y-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">

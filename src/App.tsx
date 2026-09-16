@@ -11,6 +11,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { TripRecapModal } from './components/TripRecapModal';
 import { CheckpointModal } from './components/CheckpointModal';
 import { PlaceDetailModal } from './components/PlaceDetailModal';
+import { SplashScreen } from './components/SplashScreen';
 import { EmptyState } from './components/EmptyState';
 import {
   Place,
@@ -171,6 +172,9 @@ export default function App() {
   const [isRecapGenerated, setIsRecapGenerated] = useState<boolean>(() => {
     return localStorage.getItem('budapest_recap_generated') === 'true';
   });
+
+  // Animated Splash Screen for Budapest (Sany & Rubén) - lasts 3 seconds on app start
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   // Checkpoint & Photo exchange state
   const [checkpointPlace, setCheckpointPlace] = useState<Place | null>(null);
@@ -630,6 +634,14 @@ export default function App() {
 
   return (
     <div className="bg-slate-100 dark:bg-slate-950 w-full min-h-[100dvh] flex items-center justify-center font-sans antialiased overflow-x-hidden p-0 sm:p-4 sm:py-6 transition-colors">
+      {/* 3-Second Romantic Animated Splash Screen */}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => setShowSplash(false)}
+          durationMs={3000}
+        />
+      )}
+
       {/* Modern Responsive App Canvas */}
       <div className="w-full max-w-xl md:max-w-2xl min-h-[100dvh] sm:min-h-0 sm:h-[880px] sm:max-h-[94vh] bg-white dark:bg-slate-900 sm:shadow-2xl sm:rounded-3xl sm:border sm:border-slate-200/80 dark:sm:border-slate-800 flex flex-col relative overflow-hidden transition-colors">
 
@@ -649,6 +661,7 @@ export default function App() {
           onOpenAdminModal={() => setIsAdminLoginModalOpen(true)}
           onOpenTripRecap={() => setIsTripRecapModalOpen(true)}
           isRecapGenerated={isRecapGenerated}
+          onReplayIntro={() => setShowSplash(true)}
         />
 
         {/* Filter Bar with category pills, search, priority and sorting - Collapsible */}

@@ -28,6 +28,7 @@ interface HeaderProps {
   onOpenAdminModal: () => void;
   onOpenTripRecap: () => void;
   isRecapGenerated: boolean;
+  onReplayIntro?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -45,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAdminModal,
   onOpenTripRecap,
   isRecapGenerated,
+  onReplayIntro,
 }) => {
   const percentage = totalCount > 0 ? Math.round((visitedCount / totalCount) * 100) : 0;
 
@@ -60,9 +62,12 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-2 group text-left min-w-0"
           title="Expandir cabecera"
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <span className="text-base font-display font-black text-slate-900 dark:text-white tracking-tight">
               Budapest
+            </span>
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+              Sany & Rubén
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-transform shrink-0" />
           </div>
@@ -73,6 +78,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right action controls with consistent sizes */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Replay intro button */}
+          {onReplayIntro && (
+            <button
+              id="replay-intro-compact-btn"
+              type="button"
+              onClick={onReplayIntro}
+              title="Ver intro animada de Sany & Rubén"
+              className="h-8 w-8 rounded-full flex items-center justify-center bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/90 dark:border-amber-800/80 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all shrink-0"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           {/* Collage & Recap button: Only shown to user if admin generated it, or always to admin */}
           {(isRecapGenerated || isAdmin) && (
             <button
@@ -226,6 +244,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right side controls: uniform 32-34px buttons for high precision on mobile */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Replay Intro Button */}
+          {onReplayIntro && (
+            <button
+              id="replay-intro-btn"
+              type="button"
+              onClick={onReplayIntro}
+              title="Ver animación de bienvenida (Sany & Rubén)"
+              className="h-8 w-8 rounded-full flex items-center justify-center bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/90 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all active:scale-95 shadow-2xs shrink-0"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           {/* Admin Login button (if not logged in) */}
           {!isAdmin && (
             <button
@@ -282,16 +313,17 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main Title & Progress Stats */}
       <div className="flex items-end justify-between mb-2">
         <div className="min-w-0 pr-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-display font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
               Budapest
             </h1>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 shrink-0">
-              Checklist
-            </span>
+            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/15 dark:from-amber-950/60 dark:to-rose-950/60 border border-amber-300/80 dark:border-amber-700/80 text-[11px] font-bold text-amber-800 dark:text-amber-300 shadow-2xs">
+              <Sparkles className="w-3 h-3 text-amber-500 fill-amber-400" />
+              <span>Sany & Rubén</span>
+            </div>
           </div>
-          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">
-            Monumentos, termas y rincones imprescindibles
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+            Guía de viaje, baños termales y recuerdos • 2026
           </p>
         </div>
 
