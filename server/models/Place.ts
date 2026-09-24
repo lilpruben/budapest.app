@@ -14,6 +14,7 @@ export interface IPlace {
   visitedAt?: Date | null;
   notes?: string;
   photos?: string[];
+  imageUrl?: string;
   website?: string;
   phone?: string;
   price?: string;
@@ -109,6 +110,10 @@ const PlaceSchema = new Schema<IPlace>(
     photos: {
       type: [String],
       default: [],
+    },
+    imageUrl: {
+      type: String,
+      default: '',
     },
   },
   {

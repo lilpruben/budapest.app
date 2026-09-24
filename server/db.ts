@@ -257,6 +257,7 @@ export const dbService: DBService = {
       openingHours: data.openingHours || '',
       metroOrTransit: data.metroOrTransit || '',
       priceCategory: data.priceCategory || 'free',
+      imageUrl: data.imageUrl || '',
       visitedAt: data.visited ? now : null,
       notes: data.notes || '',
       photos: Array.isArray(data.photos) ? data.photos : [],

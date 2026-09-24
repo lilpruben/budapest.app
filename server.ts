@@ -66,6 +66,7 @@ async function startServer() {
         openingHours,
         metroOrTransit,
         priceCategory,
+        imageUrl,
       } = req.body;
       if (!title || !title.trim()) {
         res.status(400).json({ ok: false, error: 'El nombre del lugar es requerido.' });
@@ -87,6 +88,7 @@ async function startServer() {
         openingHours: openingHours?.trim() || '',
         metroOrTransit: metroOrTransit?.trim() || '',
         priceCategory: priceCategory || 'free',
+        imageUrl: imageUrl?.trim() || '',
         visited: false,
       });
 

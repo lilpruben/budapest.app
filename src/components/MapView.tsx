@@ -210,7 +210,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   >
                     <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100">
                       <img
-                        src={place.photos?.[0] || getLandmarkPhoto(place.title, place.originalName, place.category)}
+                        src={place.imageUrl || place.photos?.[0] || getLandmarkPhoto(place.title, place.originalName, place.category, place.imageUrl)}
                         alt={place.title}
                         className="w-full h-full object-cover"
                         loading="lazy"

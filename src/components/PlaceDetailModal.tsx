@@ -20,6 +20,8 @@ import {
   Bus,
   Sparkles,
   Ticket,
+  Edit3,
+  Trash2,
 } from 'lucide-react';
 import { Place, PlaceCategory } from '../types';
 import { getLandmarkPhoto } from '../data/landmarkImages';
@@ -73,6 +75,9 @@ interface PlaceDetailModalProps {
   onToggleVisited: (id: string, currentStatus: boolean) => Promise<void>;
   onSaveNotes: (id: string, notes: string) => Promise<void>;
   onOpenCheckpointPhoto?: (place: Place) => void;
+  isAdmin?: boolean;
+  onEdit?: (place: Place) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
@@ -82,11 +87,15 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
   onToggleVisited,
   onSaveNotes,
   onOpenCheckpointPhoto,
+  isAdmin = false,
+  onEdit,
+  onDelete,
 }) => {
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [userNotes, setUserNotes] = useState(place?.notes || '');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [notesSavedSuccess, setNotesSavedSuccess] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   // Sync state if place changes
   React.useEffect(() => {
@@ -227,10 +236,72 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
 
         {/* Scrollable Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-sm flex-1">
+          {/* Admin Management Bar */}
+          {isAdmin && (
+            <div className="p-3 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-mono font-bold">
+                  MODO ADMIN
+                </span>
+                <span className="text-xs text-amber-950 dark:text-amber-200 font-medium">
+                  Modificar datos, foto o borrar este lugar de la checklist.
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {onEdit && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onEdit(place);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Modificar Lugar</span>
+                  </button>
+                )}
+
+                {isConfirmingDelete ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-rose-600 font-bold">¿Borrar?</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDelete?.(place._id);
+                        onClose();
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors"
+                    >
+                      Confirmar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmingDelete(false)}
+                      className="px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium"
+                    >
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingDelete(true)}
+                    className="px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Borrar</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Landmark Photo Showcase Banner */}
           <div className="relative w-full h-44 sm:h-56 rounded-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 shadow-md">
             <img
-              src={place.photos?.[0] || getLandmarkPhoto(place.title, place.originalName, place.category)}
+              src={place.imageUrl || place.photos?.[0] || getLandmarkPhoto(place.title, place.originalName, place.category, place.imageUrl)}
               alt={place.title}
               className="w-full h-full object-cover"
             />

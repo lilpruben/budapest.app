@@ -25,6 +25,7 @@ export interface Place {
   visitedAt?: string | null;
   notes?: string;
   photos?: string[];
+  imageUrl?: string;
   website?: string;
   phone?: string;
   price?: string;

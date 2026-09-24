@@ -11,6 +11,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { TripRecapModal } from './components/TripRecapModal';
 import { CheckpointModal } from './components/CheckpointModal';
 import { PlaceDetailModal } from './components/PlaceDetailModal';
+import { EditPlaceModal } from './components/EditPlaceModal';
 import { SplashScreen } from './components/SplashScreen';
 import { EmptyState } from './components/EmptyState';
 import {
@@ -185,6 +186,15 @@ export default function App() {
   const [detailPlace, setDetailPlace] = useState<Place | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
+  // Admin Place Edit Modal state
+  const [editingPlace, setEditingPlace] = useState<Place | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleOpenEditPlace = (place: Place) => {
+    setEditingPlace(place);
+    setIsEditModalOpen(true);
+  };
+
   const handleOpenDetails = (place: Place) => {
     setDetailPlace(place);
     setIsDetailModalOpen(true);
@@ -338,6 +348,14 @@ export default function App() {
   const handleDelete = async (id: string) => {
     const previous = places;
     setPlaces((prev) => prev.filter((p) => p._id !== id));
+    if (detailPlace && detailPlace._id === id) {
+      setIsDetailModalOpen(false);
+      setDetailPlace(null);
+    }
+    if (editingPlace && editingPlace._id === id) {
+      setIsEditModalOpen(false);
+      setEditingPlace(null);
+    }
 
     try {
       const res = await fetch(`/api/places/${id}`, { method: 'DELETE' });
@@ -347,6 +365,36 @@ export default function App() {
     } catch (err) {
       console.error('Failed to delete place:', err);
       setPlaces(previous);
+    }
+  };
+
+  // Modify / Update place (Admin)
+  const handleUpdatePlace = async (id: string, updatedData: Partial<Place>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/places/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!res.ok) {
+        throw new Error('Error al actualizar');
+      }
+
+      const resData = await res.json();
+      if (resData.ok && resData.data) {
+        setPlaces((prev) =>
+          prev.map((p) => (p._id === id ? { ...p, ...resData.data } : p))
+        );
+        setDetailPlace((prev) =>
+          prev && prev._id === id ? { ...prev, ...resData.data } : prev
+        );
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Failed to update place:', err);
+      return false;
     }
   };
 
@@ -480,6 +528,7 @@ export default function App() {
     price?: string;
     openingHours?: string;
     metroOrTransit?: string;
+    imageUrl?: string;
   }) => {
     const res = await fetch('/api/places', {
       method: 'POST',
@@ -812,6 +861,7 @@ export default function App() {
                     onUploadPhotos={handleUploadPhotos}
                     onDeletePhoto={handleDeletePhoto}
                     isAdmin={isAdmin}
+                    onEdit={handleOpenEditPlace}
                     onOpenCheckpointModal={handleOpenCheckpointModal}
                     onOpenDetails={handleOpenDetails}
                   />
@@ -829,6 +879,7 @@ export default function App() {
                     onUploadPhotos={handleUploadPhotos}
                     onDeletePhoto={handleDeletePhoto}
                     isAdmin={isAdmin}
+                    onEdit={handleOpenEditPlace}
                     onOpenCheckpointModal={handleOpenCheckpointModal}
                     onOpenDetails={handleOpenDetails}
                   />
@@ -1010,6 +1061,21 @@ export default function App() {
         onOpenCheckpointPhoto={(p) => {
           handleOpenCheckpointModal(p, false);
         }}
+        isAdmin={isAdmin}
+        onEdit={handleOpenEditPlace}
+        onDelete={handleDelete}
+      />
+
+      {/* Admin Place Edit & Delete Modal */}
+      <EditPlaceModal
+        isOpen={isEditModalOpen}
+        place={editingPlace}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingPlace(null);
+        }}
+        onSave={handleUpdatePlace}
+        onDelete={handleDelete}
       />
     </div>
   );

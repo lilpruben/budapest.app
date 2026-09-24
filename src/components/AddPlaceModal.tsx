@@ -18,6 +18,7 @@ interface AddPlaceModalProps {
     price?: string;
     openingHours?: string;
     metroOrTransit?: string;
+    imageUrl?: string;
   }) => Promise<void>;
 }
 
@@ -32,6 +33,7 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
   const [priority, setPriority] = useState<PlacePriority>('recomendado');
   const [description, setDescription] = useState('');
   const [locationName, setLocationName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [tip, setTip] = useState('');
   const [website, setWebsite] = useState('');
   const [phone, setPhone] = useState('');
@@ -66,6 +68,7 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
         price: price.trim() || undefined,
         openingHours: openingHours.trim() || undefined,
         metroOrTransit: metroOrTransit.trim() || undefined,
+        imageUrl: imageUrl.trim() || undefined,
       });
 
       // Reset
@@ -73,6 +76,7 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
       setOriginalName('');
       setDescription('');
       setLocationName('');
+      setImageUrl('');
       setTip('');
       setWebsite('');
       setPhone('');
@@ -219,6 +223,21 @@ export const AddPlaceModal: React.FC<AddPlaceModalProps> = ({
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="Ej. Distrito VII, cerca de Deák Ferenc tér"
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium"
+            />
+          </div>
+
+          {/* Optional Direct Image URL */}
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+              URL de Foto (Opcional - si se deja vacío se asignará foto verificada)
+            </label>
+            <input
+              id="new-place-image-url"
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://images.unsplash.com/... o enlace de foto"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none font-medium text-xs font-mono"
             />
           </div>
 
